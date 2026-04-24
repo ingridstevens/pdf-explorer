@@ -1,0 +1,3795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Layer Explorer</title>
+<script>(function(){if(localStorage.getItem('pdf-explorer-theme')==='dark')document.documentElement.setAttribute('data-theme','dark');})()</script>
+<style>
+/* ── Custom properties (theme tokens) ──────────────────────────────────────
+   Light mode is the default (:root). Dark mode overrides via html[data-theme="dark"].
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+  /* Accent — indigo */
+  --accent: #5B6CFF;
+  --accent-hover: #4A55DD;
+ 
+  /* Selection / hover states */
+  --bg-lit: #ECEEFF;
+  --bg-hover: #E5E5EB;
+ 
+  /* Surface levels (deepest → highest) */
+  --bg-col: #F8F8FA;
+  --bg-header: #ECECF0;
+ 
+  /* Borders */
+  --border: #D1D1D6;
+  --border-dark: #D5D5DA;
+ 
+  /* Text */
+  --text-hint: #86868B;
+ 
+  /* Scrollbars */
+  --bg-scrollbar: #C8BDB4;
+ 
+  /* Badges — light (muted pastels, same hue families) */
+  --badge-mark-bg: #E8E0F8; --badge-mark-fg: #5040A0;
+  --badge-text-bg: #D8EEF8; --badge-text-fg: #2060A8;
+  --badge-state-bg: #FFF0D8; --badge-state-fg: #A06010;
+  --badge-path-bg: #FFE8DF; --badge-path-fg: #A84020;
+  --badge-clip-bg: #E8F0D8; --badge-clip-fg: #507030;
+  --badge-image-bg: #D8F0E8; --badge-image-fg: #207050;
+ 
+  /* Body */
+  --body-bg: #FAFAFA;
+  --body-text: #1D1D1F;
+  --text-primary: #1D1D1F;
+  --text-secondary: #6A5A50;
+  --text-input: #1D1D1F;
+  --text-placeholder: #A09088;
+ 
+  /* Panels */
+  --bg-panel: #F3F3F5;
+  --bg-panel-header: #ECECF0;
+  --bg-input: #F8F8FA;
+ 
+  /* Buttons */
+  --btn-bg: #E8E8ED;
+  --btn-text: #1D1D1F;
+  --btn-bg-hover: #DCDCE3;
+  --btn-active-bg: #ECEEFF;
+  --btn-active-border: #4A55DD;
+  --btn-active-text: #3A46CC;
+ 
+  /* Canvas / surfaces */
+  --bg-canvas: #E0DBD6;
+  --bg-surface: #EDE9E5;
+  --bg-overlay: rgba(0, 0, 0, 0.4);
+  --loader-bg: rgba(250, 247, 244, 0.92);
+ 
+  /* Misc */
+  --scrollbar-extra: #C7C7CC;
+  --badge-other-bg: #EBEBF0;
+  --badge-other-fg: #636370;
+  --layer-on-border: #4A55DD;
+  --layer-on-bg: #ECEEFF;
+  --page-section-hover-bg: #E0E0E8;
+ 
+  /* Syntax colors */
+  --tree-text-green: #2A7A3A;
+  --tree-text-gfx: #8050C0;
+  --rw-op: #3A46CC;
+  --rw-num: #007AFF;
+  --rw-str: #2A7A3A;
+  --rw-mark: #6850A8;
+  --rw-decoded: #A07010;
+}
+ 
+/* ── Dark theme overrides ─────────────────────────────────────────────────── */
+html[data-theme="dark"] {
+  --bg-lit: #2C1B14;
+  --bg-hover: #2C2C2E;
+  --bg-col: #1C1C1E;
+  --bg-header: #242426;
+  --border: #3A3A3C;
+  --border-dark: #2C2C2E;
+  --text-hint: #636366;
+  --bg-scrollbar: #3A3A3C;
+  --badge-mark-bg: #2A1C42; --badge-mark-fg: #C8B8FF;
+  --badge-text-bg: #0C2830; --badge-text-fg: #70B0E8;
+  --badge-state-bg: #3A2000; --badge-state-fg: #E89840;
+  --badge-path-bg: #2A1408; --badge-path-fg: #E08060;
+  --badge-clip-bg: #1E2010; --badge-clip-fg: #B8E080;
+  --badge-image-bg: #102A18; --badge-image-fg: #80D8A8;
+  --body-bg: #161618;
+  --body-text: #E5E5EA;
+  --text-primary: #F2F2F7;
+  --text-secondary: #AEAEB2;
+  --text-input: #E5E5EA;
+  --text-placeholder: #636366;
+  --bg-panel: #1C1C1E;
+  --bg-panel-header: #242426;
+  --bg-input: #2C2C2E;
+  --btn-bg: #2C2C2E;
+  --btn-text: #E5E5EA;
+  --btn-bg-hover: #3A3A3C;
+  --btn-active-bg: #1A1C3A;
+  --btn-active-border: #3A3FBB;
+  --btn-active-text: #9AAEFF;
+  --bg-canvas: #111113;
+  --bg-surface: #1C1C1E;
+  --bg-overlay: rgba(0, 0, 0, 0.75);
+  --loader-bg: rgba(22, 22, 24, 0.94);
+  --scrollbar-extra: #4A4A4C;
+  --badge-other-bg: #2C2C2E;
+  --badge-other-fg: #AEAEB2;
+  --layer-on-border: #3A3FBB;
+  --layer-on-bg: #1A1C3A;
+  --page-section-hover-bg: #3A3A3C;
+  --tree-text-green: #90C878;
+  --tree-text-gfx: #B090E8;
+  --rw-op: #9AAEFF;
+  --rw-num: #7AAAD8;
+  --rw-str: #90C878;
+  --rw-mark: #C8B8FF;
+  --rw-decoded: #F0C870;
+}
+ 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--body-bg);
+  color: var(--body-text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+ 
+/* ── Focus rings (accessibility) ── */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+ 
+/* ── Header ── */
+#header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+#header h1 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+#file-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+#clear-cache-btn {
+  color: #c0524f;
+  border-color: #e0a0a0;
+}
+html[data-theme="dark"] #clear-cache-btn {
+  color: #FF6B6B;
+  border-color: #5A2020;
+}
+#page-info {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+#raw-search-count {
+  font-size: 11px;
+  color: var(--text-hint);
+  white-space: nowrap;
+}
+#raw-search-all-label {
+  font-size: 10.5px;
+  color: var(--text-hint);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  flex-shrink: 0;
+}
+#raw-search-all-label input { cursor: pointer; accent-color: var(--accent); }
+ 
+/* Multi-page search results */
+#multipage-results {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--bg-col);
+  z-index: 20;
+  overflow-y: auto;
+  display: none;
+}
+#multipage-results.open { display: block; }
+.mp-result-group {
+  border-bottom: 1px solid var(--border-dark);
+}
+.mp-page-hdr {
+  padding: 5px 10px;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-hint);
+  background: var(--bg-panel-header);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+}
+.mp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 10px;
+  cursor: pointer;
+  font-family: 'Fira Code', monospace;
+  font-size: 10.5px;
+  color: var(--text-secondary);
+  border-bottom: 1px solid var(--border-dark);
+}
+.mp-row:hover { background: var(--bg-hover); }
+.mp-row-op { color: var(--rw-op); font-weight: 600; min-width: 28px; }
+.mp-row-text { color: var(--rw-decoded); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.mp-no-results { padding: 24px 16px; font-size: 12px; color: var(--text-hint); }
+.hbtn {
+  padding: 5px 13px;
+  background: var(--btn-bg);
+  border: 1px solid var(--border);
+  color: var(--btn-text);
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.12s, box-shadow 0.12s;
+  flex-shrink: 0;
+}
+.hbtn:hover {
+  background: var(--btn-bg-hover);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+.hbtn.active {
+  background: var(--btn-active-bg);
+  border-color: var(--btn-active-border);
+  color: var(--btn-active-text);
+}
+.hbtn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.hbtn.primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 2px 8px rgba(91, 108, 255, 0.3);
+}
+.hbtn.icon-btn {
+  padding: 5px 9px;
+  font-size: 14px;
+  line-height: 1;
+}
+#page-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+#scale-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  flex-shrink: 0;
+}
+#scale-ctrl input {
+  width: 65px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+#header-right {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+ 
+/* ── Main ── */
+#main {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+ 
+/* ── Left panel — two-column layout ── */
+#left-panel {
+  width: 600px;
+  min-width: 460px;
+  max-width: 900px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+}
+ 
+/* ── Resizable splitter ── */
+#splitter {
+  width: 4px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--border-dark);
+  transition: background 0.15s;
+  position: relative;
+  z-index: 10;
+}
+#splitter:hover, #splitter.dragging {
+  background: var(--accent);
+}
+ 
+/* Column header bar */
+#col-headers {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-dark);
+  background: var(--bg-panel-header);
+  min-height: 33px;
+}
+.col-hdr {
+  padding: 6px 10px;
+  font-size: 12px;
+  color: var(--text-hint);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#raw-col-hdr {
+  width: var(--raw-col-w, 300px);
+  min-width: 160px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border-dark);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.col-hint {
+  font-size: 10px;
+  color: var(--text-hint);
+}
+#struct-col-hdr {
+  flex: 1;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+#raw-search {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--text-input);
+  font-family: inherit;
+  outline: none;
+  width: 100px;
+}
+#raw-search:focus {
+  border-color: var(--accent);
+}
+#raw-search::placeholder {
+  color: var(--text-placeholder);
+}
+#struct-search {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--text-input);
+  font-family: inherit;
+  outline: none;
+  max-width: 180px;
+}
+#struct-search:focus {
+  border-color: var(--accent);
+}
+#struct-search::placeholder {
+  color: var(--text-placeholder);
+}
+.raw-line.search-match {
+  background: rgba(91, 108, 255, 0.12);
+}
+.raw-line.search-hidden {
+  display: none;
+}
+ 
+/* Two scrollable columns */
+#left-cols {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+}
+#raw-col {
+  width: var(--raw-col-w, 300px);
+  min-width: 160px;
+  flex-shrink: 0;
+  overflow: auto;
+  background: var(--bg-col);
+}
+ 
+/* ── Inner column splitter ── */
+#col-splitter {
+  width: 4px;
+  flex-shrink: 0;
+  cursor: col-resize;
+  background: var(--border-dark);
+  transition: background 0.15s;
+  z-index: 5;
+}
+#col-splitter:hover, #col-splitter.dragging {
+  background: var(--accent);
+}
+#raw-col::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#raw-col::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+#struct-col {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+#struct-col::-webkit-scrollbar {
+  width: 5px;
+}
+#struct-col::-webkit-scrollbar-thumb {
+  background: var(--bg-scrollbar);
+  border-radius: 3px;
+}
+ 
+/* Clickable raw lines */
+#raw-content {
+  padding: 4px 0;
+  font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', 'Consolas', monospace;
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  min-width: max-content;
+}
+.raw-line {
+  display: block;
+  padding: 0 10px;
+  white-space: pre;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+}
+.raw-line:hover {
+  background: rgba(91, 108, 255, 0.07);
+}
+.raw-line.lit {
+  background: var(--bg-lit);
+  border-left-color: var(--accent);
+  animation: yellowFlashRaw 0.9s ease-out;
+}
+@keyframes yellowFlashRaw {
+  0% {
+    background: rgba(91, 108, 255, 0.35);
+    border-left-color: #7B8FFF;
+  }
+  35% {
+    background: rgba(91, 108, 255, 0.18);
+    border-left-color: var(--accent);
+  }
+  100% {
+    background: var(--bg-lit);
+    border-left-color: var(--accent);
+  }
+}
+ 
+/* Info modal */
+#info-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  z-index: 300;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 40px;
+}
+#info-modal.open {
+  display: flex;
+}
+#info-modal-box {
+  background: var(--bg-header);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15), 0 8px 10px rgba(0, 0, 0, 0.08);
+  width: 620px;
+  max-height: 80vh;
+  overflow-y: auto;
+  padding: 20px 22px;
+  position: relative;
+}
+#info-modal-box::-webkit-scrollbar {
+  width: 5px;
+}
+#info-modal-box::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-extra);
+  border-radius: 3px;
+}
+#info-modal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 14px;
+}
+#info-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-hint);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+#info-modal-close:hover {
+  color: var(--btn-text);
+}
+ 
+/* ── Structure tree ── */
+#struct-panel {
+  padding: 6px 4px;
+}
+.struct-hdr {
+  padding: 6px 10px 4px;
+  font-size: 10.5px;
+  color: var(--text-hint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.struct-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--text-hint);
+  font-size: 13px;
+}
+.tree-node {
+}
+.tree-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+.tree-label:hover {
+  background: var(--bg-hover);
+}
+.tree-label.lit {
+  background: var(--bg-lit);
+  animation: yellowFlashTree 0.9s ease-out;
+}
+@keyframes yellowFlashTree {
+  0% {
+    background: rgba(91, 108, 255, 0.3);
+  }
+  35% {
+    background: rgba(91, 108, 255, 0.15);
+  }
+  100% {
+    background: var(--bg-lit);
+  }
+}
+.tree-toggle {
+  font-size: 9px;
+  color: var(--text-hint);
+  width: 11px;
+  text-align: center;
+  flex-shrink: 0;
+  transition: transform 0.12s;
+}
+.tree-toggle.open {
+  transform: rotate(90deg);
+}
+.tree-toggle.leaf {
+  color: var(--border);
+}
+.tree-children {
+  padding-left: 16px;
+  border-left: 1px solid var(--border-dark);
+  margin-left: 9px;
+}
+.tree-children.collapsed {
+  display: none;
+}
+.tree-tag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.tt-span {
+  background: var(--badge-text-bg);
+  color: var(--badge-text-fg);
+}
+.tt-p {
+  background: var(--badge-mark-bg);
+  color: var(--badge-mark-fg);
+}
+.tt-art {
+  background: var(--badge-other-bg);
+  color: var(--badge-other-fg);
+}
+.tt-fig {
+  background: var(--badge-image-bg);
+  color: var(--badge-image-fg);
+}
+.tt-oth {
+  background: var(--badge-other-bg);
+  color: var(--text-secondary);
+}
+.tree-text {
+  color: var(--tree-text-green);
+  font-size: 11.5px;
+  font-family: 'Fira Code', monospace;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.tree-text.empty {
+  color: var(--text-hint);
+  font-style: italic;
+}
+.tree-text.gfx {
+  color: var(--tree-text-gfx);
+}
+.tree-mcid {
+  font-size: 10px;
+  color: var(--text-hint);
+  flex-shrink: 0;
+}
+.tree-cnt {
+  font-size: 10px;
+  color: var(--text-hint);
+  flex-shrink: 0;
+}
+ 
+/* ── Tree nested ops ── */
+.tree-ops-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 6px 2px 20px;
+}
+.tree-ops-btn {
+  font-size: 10px;
+  color: var(--text-hint);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 1px 7px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.tree-ops-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+  border-color: var(--accent);
+}
+.tree-ops-btn.open {
+  color: var(--badge-text-fg);
+  border-color: var(--accent);
+}
+.tree-ops-panel {
+  display: none;
+  margin: 0 0 4px 20px;
+  border-left: 1px solid var(--border-dark);
+  padding-left: 6px;
+}
+.tree-ops-panel.open {
+  display: block;
+}
+.top-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  padding: 2px 4px;
+  cursor: pointer;
+  border-radius: 3px;
+  min-height: 20px;
+}
+.top-row:hover {
+  background: var(--bg-hover);
+}
+.top-row.lit {
+  background: var(--bg-lit);
+}
+.top-badge {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 5px;
+  border-radius: 2px;
+  min-width: 40px;
+  text-align: center;
+  margin-top: 1px;
+}
+.top-code {
+  font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', 'Consolas', monospace;
+  font-size: 10.5px;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  word-break: break-all;
+  flex: 1;
+}
+ 
+/* ── Operators tab ── */
+#ops-tab-panel {
+  display: none;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+#ops-tab-panel.active {
+  display: flex;
+}
+#search-bar {
+  padding: 6px 7px;
+  border-bottom: 1px solid var(--border-dark);
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+#search-input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: var(--text-input);
+  font-family: inherit;
+  outline: none;
+}
+#search-input:focus {
+  border-color: var(--accent);
+}
+#search-input::placeholder {
+  color: var(--text-placeholder);
+}
+#search-count {
+  font-size: 10px;
+  color: var(--text-hint);
+  min-width: 52px;
+  text-align: right;
+}
+#clear-btn {
+  background: none;
+  border: none;
+  color: var(--text-hint);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 2px;
+  display: none;
+}
+#clear-btn:hover {
+  color: var(--text-secondary);
+}
+#ops-list {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+#ops-list::-webkit-scrollbar {
+  width: 5px;
+}
+#ops-list::-webkit-scrollbar-thumb {
+  background: var(--bg-scrollbar);
+  border-radius: 3px;
+}
+#ops-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-hint);
+  font-size: 13px;
+  padding: 50px 25px;
+  text-align: center;
+}
+#ops-empty svg {
+  opacity: 0.15;
+}
+ 
+.grp-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 7px;
+  background: var(--bg-panel-header);
+  border-bottom: 1px solid var(--border-dark);
+  border-top: 1px solid var(--border-dark);
+  cursor: pointer;
+  user-select: none;
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.grp-header:hover {
+  background: var(--bg-input);
+}
+.grp-header.hasfill {
+  color: var(--btn-text);
+}
+.arrow {
+  font-size: 9px;
+  transition: transform 0.12s;
+  flex-shrink: 0;
+  color: var(--text-hint);
+}
+.arrow.open {
+  transform: rotate(90deg);
+}
+.grp-text-prev {
+  color: var(--tree-text-green);
+  font-size: 11px;
+  font-family: 'Fira Code', monospace;
+  margin-left: 3px;
+}
+.grp-count {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-hint);
+}
+.grp-items.collapsed {
+  display: none;
+}
+ 
+.op-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 2px 7px 2px 18px;
+  cursor: pointer;
+  transition: background 0.07s;
+  min-height: 22px;
+  user-select: none;
+}
+.op-row:hover {
+  background: var(--bg-hover);
+}
+.op-row.lit {
+  background: var(--bg-lit) !important;
+}
+.op-row.flash {
+  animation: rfl 1.2s ease;
+}
+@keyframes rfl {
+  0% {
+    background: rgba(91, 108, 255, 0.25);
+  }
+  20% {
+    background: var(--bg-hover);
+  }
+  100% {
+    background: var(--bg-lit);
+  }
+}
+.op-row.search-hidden {
+  display: none;
+}
+ 
+.badge {
+  flex-shrink: 0;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 3px;
+  min-width: 50px;
+  text-align: center;
+  margin-top: 2px;
+}
+.b-mark {
+  background: var(--badge-mark-bg);
+  color: var(--badge-mark-fg);
+}
+.b-text {
+  background: var(--badge-text-bg);
+  color: var(--badge-text-fg);
+}
+.b-state {
+  background: var(--badge-state-bg);
+  color: var(--badge-state-fg);
+}
+.b-path {
+  background: var(--badge-path-bg);
+  color: var(--badge-path-fg);
+}
+.b-clip {
+  background: var(--badge-clip-bg);
+  color: var(--badge-clip-fg);
+}
+.b-image {
+  background: var(--badge-image-bg);
+  color: var(--badge-image-fg);
+}
+.op-code {
+  font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', 'Consolas', monospace;
+  font-size: 11.5px;
+  line-height: 1.9;
+  color: var(--btn-text);
+  word-break: break-all;
+  flex: 1;
+}
+.decoded-str {
+  color: var(--tree-text-green);
+}
+ 
+/* ── Info tab ── */
+#info-tab {
+  padding: 10px 12px;
+  gap: 12px;
+}
+.info-section {
+  margin-bottom: 14px;
+}
+.info-section h3 {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--text-hint);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-dark);
+}
+.info-row {
+  display: flex;
+  gap: 8px;
+  font-size: 12px;
+  padding: 2px 0;
+}
+.info-key {
+  color: var(--text-hint);
+  min-width: 120px;
+  flex-shrink: 0;
+}
+.info-val {
+  color: var(--btn-text);
+  word-break: break-all;
+  font-family: 'Fira Code', monospace;
+}
+.info-val.highlight {
+  color: var(--tree-text-green);
+}
+.coord-explainer {
+  background: var(--bg-panel-header);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  margin-top: 4px;
+}
+.coord-explainer strong {
+  color: var(--btn-text);
+}
+ 
+/* ── Raw tab ── */
+#raw-tab {
+  padding: 0;
+}
+#raw-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-dark);
+  flex-shrink: 0;
+  background: var(--bg-header);
+}
+#raw-toolbar span {
+  font-size: 11px;
+  color: var(--text-hint);
+}
+#raw-content {
+  flex: 1;
+  overflow: auto;
+  padding: 8px 10px;
+  font-family: 'Fira Code', 'Cascadia Code', 'SF Mono', 'Consolas', monospace;
+  font-size: 11px;
+  line-height: 1.7;
+  white-space: pre;
+  color: var(--text-secondary);
+}
+#raw-content::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+#raw-content::-webkit-scrollbar-thumb {
+  background: var(--bg-scrollbar);
+  border-radius: 3px;
+}
+/* Raw syntax colors */
+.rw-op {
+  color: var(--rw-op);
+  font-weight: 600;
+}
+.rw-num {
+  color: var(--rw-num);
+}
+.rw-str {
+  color: var(--rw-str);
+}
+.rw-mark {
+  color: var(--rw-mark);
+}
+.rw-cmt {
+  color: var(--text-hint);
+}
+/* Decoded text — shown prominently so PDF text is always findable */
+.rw-decoded {
+  color: var(--rw-decoded);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.rw-arrow {
+  color: var(--text-hint);
+}
+ 
+/* ── Right ── */
+#right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+ 
+/* ── Canvas toolbar (page nav + zoom) ── */
+#canvas-toolbar {
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-dark);
+  padding: 5px 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 34px;
+}
+#canvas-toolbar #page-nav {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+#canvas-toolbar #scale-ctrl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+#canvas-toolbar #scale-ctrl input {
+  width: 65px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+ 
+/* ── Layers bar ── */
+#layers-bar {
+  display: none;
+  flex-shrink: 0;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border-dark);
+  padding: 5px 12px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-height: 34px;
+}
+#layers-bar.visible {
+  display: flex;
+}
+#layers-hdr {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-hint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+#layers-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.layer-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px 3px 7px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.1s, border-color 0.1s;
+}
+.layer-chip:hover {
+  background: var(--btn-bg-hover);
+  border-color: var(--scrollbar-extra);
+}
+.layer-chip.layer-on {
+  border-color: var(--layer-on-border);
+  background: var(--layer-on-bg);
+}
+.layer-chip input[type='checkbox'] {
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  accent-color: var(--accent);
+  margin: 0;
+}
+.layer-chip-lbl {
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  user-select: none;
+  white-space: nowrap;
+}
+.layer-chip.layer-on .layer-chip-lbl {
+  color: var(--badge-text-fg);
+}
+#layers-eye-all {
+  font-size: 10px;
+  color: var(--text-hint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: inherit;
+}
+#layers-eye-all:hover {
+  color: var(--text-secondary);
+  background: var(--border-dark);
+}
+ 
+#canvas-area {
+  flex: 1;
+  overflow: auto;
+  padding: 18px;
+  display: flex;
+  justify-content: safe center;
+  align-items: flex-start;
+  background: var(--bg-canvas);
+}
+#canvas-area::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+#canvas-area::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
+#canvas-placeholder {
+  color: var(--text-hint);
+  margin-top: 60px;
+  border: 1.5px dashed var(--border);
+  border-radius: 12px;
+  padding: 32px 40px;
+  max-width: 380px;
+  text-align: center;
+  line-height: 1.7;
+}
+.placeholder-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+.placeholder-body {
+  font-size: 12.5px;
+  color: var(--text-hint);
+  margin-bottom: 16px;
+  line-height: 1.65;
+}
+.placeholder-hint {
+  font-size: 11.5px;
+  color: var(--text-hint);
+  opacity: 0.7;
+}
+#canvas-area.drag-over {
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-canvas));
+  outline: 2px dashed var(--accent);
+  outline-offset: -10px;
+}
+#canvas-wrapper {
+  position: relative;
+  display: inline-block;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.06);
+  border-radius: 2px;
+}
+#pdf-canvas {
+  display: block;
+}
+#grid-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+#hl-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+#click-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: grab;
+  opacity: 0;
+}
+#click-canvas.grabbing {
+  cursor: grabbing;
+}
+ 
+/* Op picker — shown when multiple ops overlap at click point */
+.op-picker {
+  position: absolute;
+  z-index: 50;
+  background: var(--bg-header);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.85);
+  min-width: 210px;
+  max-width: 360px;
+  overflow: hidden;
+  animation: opPickerIn 0.12s ease-out;
+  transform-origin: top left;
+}
+@keyframes opPickerIn {
+  from {
+    opacity: 0;
+    transform: scale(0.93);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.op-picker-hdr {
+  padding: 5px 10px;
+  font-size: 10px;
+  color: var(--text-hint);
+  background: var(--bg-panel-header);
+  border-bottom: 1px solid var(--border);
+}
+.op-picker-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-dark);
+}
+.op-picker-item:last-child {
+  border-bottom: none;
+}
+.op-picker-item:hover {
+  background: var(--bg-hover);
+}
+.op-picker-name {
+  font-family: 'Fira Code', monospace;
+  font-size: 10.5px;
+  color: var(--btn-text);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.op-picker-dist {
+  font-size: 9px;
+  color: var(--text-hint);
+  flex-shrink: 0;
+}
+.click-ripple {
+  position: absolute;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  margin-left: -9px;
+  margin-top: -9px;
+  border: 2px solid var(--accent);
+  animation: rip 0.4s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes rip {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+ 
+/* Page turn animation */
+@keyframes pageSlideIn {
+  0% {
+    opacity: 0.3;
+    transform: translateX(26px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.page-turn-in {
+  animation: pageSlideIn 0.28s ease-out;
+}
+/* Page badge for multi-page structure items */
+.page-badge {
+  font-size: 9px;
+  font-weight: 600;
+  background: var(--badge-other-bg);
+  color: var(--badge-other-fg);
+  padding: 1px 5px;
+  border-radius: 3px;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+.page-badge.current {
+  background: var(--bg-lit);
+  color: var(--badge-text-fg);
+}
+/* All-pages structure */
+.page-section-hdr {
+  padding: 6px 10px;
+  font-size: 11px;
+  color: var(--text-hint);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-dark);
+  cursor: pointer;
+  user-select: none;
+}
+.page-section-hdr:hover {
+  background: var(--page-section-hover-bg);
+}
+.page-section-hdr.current-page {
+  color: var(--badge-text-fg);
+}
+.page-section-body {
+  border-bottom: 1px solid var(--border-dark);
+}
+ 
+/* ── Coord strip ── */
+#coord-strip {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 4px 14px;
+  background: var(--bg-panel-header);
+  border-top: 1px solid var(--border-dark);
+  border-bottom: 1px solid var(--border-dark);
+  font-size: 11.5px;
+  font-family: 'Fira Code', monospace;
+  color: var(--text-hint);
+  min-height: 26px;
+}
+#coord-xy {
+  color: var(--text-secondary);
+}
+#coord-xy span {
+  color: var(--badge-text-fg);
+}
+#page-dims {
+  color: var(--text-hint);
+}
+ 
+/* ── Info box ── */
+#info-box {
+  flex-shrink: 0;
+  border-top: 1px solid var(--border-dark);
+  background: var(--bg-surface);
+  height: 220px;
+  min-height: 26px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+#info-box.animating {
+  /* no transition — instant response when switching operators */
+}
+ 
+/* Drag-handle / title bar */
+#info-handle {
+  flex-shrink: 0;
+  height: 26px;
+  min-height: 26px;
+  background: var(--bg-header);
+  border-bottom: 1px solid var(--border-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 8px 0 6px;
+  cursor: ns-resize;
+  user-select: none;
+}
+#info-handle:hover {
+  background: var(--bg-input);
+}
+.info-grip {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 2px 3px;
+  flex-shrink: 0;
+}
+.info-grip span {
+  display: block;
+  width: 16px;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+}
+#info-handle-label {
+  font-size: 11px;
+  color: var(--text-hint);
+  letter-spacing: 0.04em;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#info-handle-op {
+  font-family: 'Fira Code', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  display: none; /* shown only when collapsed */
+}
+#info-box.collapsed #info-handle-label {
+  display: none;
+}
+#info-box.collapsed #info-handle-op {
+  display: block;
+}
+#info-toggle-btn {
+  flex-shrink: 0;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-hint);
+  font-size: 10px;
+  width: 20px;
+  height: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.1s, color 0.1s;
+}
+#info-toggle-btn:hover {
+  background: var(--btn-bg-hover);
+  color: var(--text-secondary);
+  border-color: var(--scrollbar-extra);
+}
+ 
+/* Body (scrollable content area) */
+#info-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;
+}
+#info-top {
+  padding: 6px 13px 0;
+  flex-shrink: 0;
+}
+#info-op {
+  font-family: 'Fira Code', monospace;
+  font-size: 11px;
+  color: var(--accent);
+  word-break: break-all;
+}
+#info-decoded {
+  font-size: 12px;
+  color: var(--tree-text-green);
+  margin-top: 2px;
+  font-family: 'Fira Code', monospace;
+}
+#info-decoded:empty {
+  display: none;
+}
+#info-text {
+  flex: 1;
+  padding: 5px 13px 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.65;
+  overflow-y: auto;
+  white-space: pre-line;
+  min-height: 0;
+}
+#info-text.placeholder {
+  color: var(--text-hint);
+}
+#info-text::-webkit-scrollbar {
+  width: 4px;
+}
+#info-text::-webkit-scrollbar-thumb {
+  background: var(--bg-scrollbar);
+}
+ 
+/* ── Operator-type layer filter bar ── */
+#op-layer-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 8px;
+  background: var(--bg-panel-header);
+  border-bottom: 1px solid var(--border-dark);
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+#op-layer-bar-lbl {
+  font-size: 11px;
+  color: var(--text-hint);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  margin-right: 2px;
+}
+.op-layer-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  color: var(--text-secondary);
+  transition: background 0.1s, border-color 0.1s, opacity 0.1s;
+  user-select: none;
+}
+.op-layer-btn:hover {
+  background: var(--btn-bg-hover);
+  border-color: var(--scrollbar-extra);
+}
+.op-layer-btn.layer-on {
+  border-color: var(--layer-on-border);
+  background: var(--layer-on-bg);
+  color: var(--btn-active-text);
+}
+.op-layer-btn .op-layer-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+.op-layer-cnt {
+  font-size: 9.5px;
+  color: var(--text-hint);
+  margin-left: 2px;
+  font-variant-numeric: tabular-nums;
+}
+.op-layer-btn.layer-on .op-layer-cnt {
+  color: var(--btn-active-text);
+  opacity: 0.7;
+}
+#op-layer-hint-btn {
+  margin-left: auto;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-hint);
+  font-size: 10px;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+#op-layer-hint-btn:hover {
+  background: var(--btn-bg-hover);
+  color: var(--text-secondary);
+  border-color: var(--scrollbar-extra);
+}
+/* Per-type hide rules — toggled by adding hide-{type} class to #raw-content */
+#raw-content.hide-mark    .raw-line[data-type="mark"]    { display: none; }
+#raw-content.hide-text    .raw-line[data-type="text"]    { display: none; }
+#raw-content.hide-state   .raw-line[data-type="state"]   { display: none; }
+#raw-content.hide-path    .raw-line[data-type="path"]    { display: none; }
+#raw-content.hide-clip    .raw-line[data-type="clip"]    { display: none; }
+#raw-content.hide-image   .raw-line[data-type="image"]   { display: none; }
+ 
+/* ── Per-row copy button ── */
+.op-copy-btn {
+  display: none;
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-hint);
+  font-size: 11px;
+  padding: 0 5px;
+  line-height: 18px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.1s, color 0.1s;
+}
+.op-copy-btn:hover { background: var(--btn-bg-hover); color: var(--text-secondary); }
+.raw-line { position: relative; }
+.raw-line:hover .op-copy-btn { display: block; }
+ 
+/* ── Panel empty state ── */
+.panel-empty {
+  padding: 24px 16px;
+}
+.panel-empty-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+.panel-empty-body {
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text-hint);
+}
+.panel-empty-body code {
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 10.5px;
+  color: var(--rw-op);
+  background: var(--bg-input);
+  padding: 0 3px;
+  border-radius: 3px;
+}
+ 
+#loader {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--loader-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 28px;
+  font-size: 13px;
+  color: var(--btn-text);
+  z-index: 100;
+}
+ 
+/* ── Keyboard shortcuts modal ── */
+#keys-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: var(--bg-overlay);
+  z-index: 300;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 40px;
+}
+#keys-modal.open { display: flex; }
+#keys-modal-box {
+  background: var(--bg-header);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 20px 25px rgba(0, 0, 0, 0.15), 0 8px 10px rgba(0, 0, 0, 0.08);
+  width: 360px;
+  padding: 20px 22px;
+  position: relative;
+}
+#keys-modal-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+#keys-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-hint);
+  font-size: 18px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+}
+#keys-modal-close:hover { color: var(--btn-text); }
+.keys-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 14px;
+  align-items: center;
+}
+.key-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 10.5px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 2px 7px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+.keys-grid span:not(.key-badge) {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+ 
+/* Toast notification */
+@keyframes toastFadeOut {
+  0% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: var(--btn-text);
+  z-index: 500;
+  animation: toastFadeOut 2s 0.5s forwards;
+  pointer-events: none;
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"
+        integrity="sha512-q+4liFwdPC/bNdhUpZx6aXDx/h77yEQtn4I1slHydcbZK34nLaR3cAeYSJshoxIOq3mjEf7xJE8YWIUHMn+oCQ=="
+        crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="loader">⏳ Processing…</div>
+ 
+<div id="header">
+  <h1>PDF Layer Explorer</h1>
+  <input type="file" id="file-input" accept=".pdf" style="display:none">
+  <button class="hbtn primary" onclick="document.getElementById('file-input').click()">Upload PDF</button>
+  <span id="file-label" style="display:none"></span>
+  <button id="clear-cache-btn" class="hbtn" style="display:none" title="Remove cached PDF" aria-label="Remove cached PDF">✕ Clear</button>
+  <div id="header-right">
+    <button class="hbtn" id="grid-btn" title="Toggle coordinate grid" aria-label="Toggle coordinate grid">📐 Grid</button>
+    <button class="hbtn" id="info-btn" title="Document info and metadata" aria-label="Document info and metadata">📋 Info</button>
+    <button class="hbtn icon-btn" id="theme-btn" title="Toggle light/dark mode" aria-label="Toggle light/dark mode">🌙</button>
+  </div>
+</div>
+ 
+<div id="main">
+  <div id="left-panel">
+ 
+    <!-- Column header bar -->
+    <div id="col-headers">
+      <div class="col-hdr" id="raw-col-hdr">
+        📄 Raw Stream
+        <input id="raw-search" type="text" placeholder="find text…" autocomplete="off" spellcheck="false" aria-label="Search raw stream">
+        <span id="raw-search-count"></span>
+        <label id="raw-search-all-label" title="Search across all pages"><input type="checkbox" id="raw-search-all"> All pages</label>
+        <button class="hbtn" id="export-stream-btn" style="display:none" title="Export raw operator stream as text" aria-label="Export stream">↓ Export</button>
+      </div>
+      <div class="col-hdr" id="struct-col-hdr">
+        🌳 Structure + Operators
+        <input id="struct-search" type="text" placeholder="filter nodes…" autocomplete="off" spellcheck="false" aria-label="Filter structure nodes">
+      </div>
+    </div>
+ 
+    <!-- Operator layer filter bar — spans full left panel width -->
+    <div id="op-layer-bar">
+      <span id="op-layer-bar-lbl">Operator Layers</span>
+      <button class="op-layer-btn layer-on" data-optype="mark"><span class="op-layer-dot" style="background:var(--badge-mark-bg)"></span>marking<span class="op-layer-cnt"></span></button>
+      <button class="op-layer-btn layer-on" data-optype="text"><span class="op-layer-dot" style="background:var(--badge-text-bg)"></span>text<span class="op-layer-cnt"></span></button>
+      <button class="op-layer-btn layer-on" data-optype="state"><span class="op-layer-dot" style="background:var(--badge-state-bg)"></span>state<span class="op-layer-cnt"></span></button>
+      <button class="op-layer-btn layer-on" data-optype="path"><span class="op-layer-dot" style="background:var(--badge-path-bg)"></span>path<span class="op-layer-cnt"></span></button>
+      <button class="op-layer-btn layer-on" data-optype="clip"><span class="op-layer-dot" style="background:var(--badge-clip-bg)"></span>clip<span class="op-layer-cnt"></span></button>
+      <button class="op-layer-btn layer-on" data-optype="image"><span class="op-layer-dot" style="background:var(--badge-image-bg)"></span>image<span class="op-layer-cnt"></span></button>
+      <button id="op-layer-hint-btn" title="Decoration codes: drawn line (thin rect with no nearby text) · underline (baseline line, rect at text base) · strikethrough (mid-text line, rect ~50% above baseline)">?</button>
+    </div>
+ 
+    <!-- Multi-page search results overlay (shown over left-cols when "All pages" is active) -->
+    <div id="multipage-results" aria-label="Multi-page search results"></div>
+ 
+    <!-- Two-column body -->
+    <div id="left-cols" style="position:relative">
+      <div id="raw-col" style="width:var(--raw-col-w,300px)">
+        <div id="raw-content">
+          <div class="panel-empty">
+            <div class="panel-empty-title">Content Stream</div>
+            <div class="panel-empty-body">Every PDF page is a sequence of drawing commands — <code>re</code> defines a rectangle, <code>rg</code> sets its color, <code>f</code> fills it. Upload a PDF to explore this stream.</div>
+          </div>
+        </div>
+      </div>
+      <div id="col-splitter" title="Drag to resize columns" aria-hidden="true"></div>
+      <div id="struct-col">
+        <div id="struct-panel">
+          <div class="panel-empty">
+            <div class="panel-empty-title">Marked Content</div>
+            <div class="panel-empty-body">If the PDF has accessibility tags (BDC/EMC operators), they appear here as a tree — paragraphs, figures, spans — linked back to the raw stream.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+ 
+    <!-- Hidden elements for JS compatibility -->
+    <div style="display:none">
+      <div id="ops-list"></div>
+      <input id="search-input" type="text">
+      <button id="clear-btn"></button>
+      <span id="search-count"></span>
+    </div>
+ 
+  </div>
+  <div id="splitter" title="Drag to resize panels" aria-hidden="true"></div>
+ 
+  <div id="right-panel">
+    <div id="canvas-toolbar" style="display:none" role="group" aria-label="Canvas controls">
+      <div id="page-nav" role="group" aria-label="Page navigation">
+        <button class="hbtn" id="prev-pg" title="Previous page" aria-label="Previous page">‹</button>
+        <span id="page-info">1/1</span>
+        <button class="hbtn" id="next-pg" title="Next page" aria-label="Next page">›</button>
+      </div>
+      <div id="scale-ctrl" role="group" aria-label="Zoom level">
+        Zoom <input type="range" id="scale-slider" min="0.5" max="3" step="0.25" value="1.5" aria-label="Zoom level">
+        <span id="scale-label">1.5×</span>
+      </div>
+    </div>
+    <div id="layers-bar">
+      <span id="layers-hdr" title="PDF Optional Content Groups (/OCProperties) — author-defined visibility groups, separate from the operator-type layers in the stream panel">OCG Layers ⓘ</span>
+      <div id="layers-list"></div>
+      <button id="layers-eye-all" title="Show or hide all layers" aria-label="Show or hide all layers">all on/off</button>
+    </div>
+    <div id="canvas-area">
+      <div id="canvas-placeholder">
+        <div class="placeholder-title">📄 PDF Layer Explorer</div>
+        <div class="placeholder-body">PDFs have no built-in concept of "strikethrough" or "underline" — those are <em>drawn</em> with the same rectangle operators as everything else. Meaning comes from coordinates, not semantic tags.</div>
+        <div class="placeholder-hint">Drop a PDF here or click Upload to explore its raw operator stream.</div>
+      </div>
+    </div>
+    <div id="coord-strip">
+      <span id="coord-xy">Move mouse over PDF for coordinates</span>
+      <span id="page-dims"></span>
+    </div>
+    <div id="info-box">
+      <!-- Drag handle / title bar -->
+      <div id="info-handle" title="Drag to resize">
+        <div class="info-grip"><span></span><span></span><span></span></div>
+        <span id="info-handle-label">Operator Info</span>
+        <span id="info-handle-op"></span>
+        <button id="info-toggle-btn" title="Minimize or expand info panel" aria-label="Minimize or expand info panel">▼</button>
+      </div>
+      <!-- Scrollable body -->
+      <div id="info-body">
+        <div id="info-top">
+          <div id="info-op"></div>
+          <div id="info-decoded"></div>
+        </div>
+        <div id="info-text" class="placeholder">Hover any operator to see its explanation · Click the PDF or a raw line to highlight</div>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- Keyboard shortcuts modal -->
+<div id="keys-modal">
+  <div id="keys-modal-box">
+    <button id="keys-modal-close" title="Close" aria-label="Close">✕</button>
+    <div id="keys-modal-title">⌨ Keyboard Shortcuts</div>
+    <div class="keys-grid">
+      <span class="key-badge">j</span><span>Next operator</span>
+      <span class="key-badge">k</span><span>Previous operator</span>
+      <span class="key-badge">Ctrl F</span><span>Focus search</span>
+      <span class="key-badge">Esc</span><span>Clear search / close</span>
+      <span class="key-badge">?</span><span>Show this help</span>
+    </div>
+  </div>
+</div>
+ 
+<!-- Info modal (opened by 📋 Info button in header) -->
+<div id="info-modal">
+  <div id="info-modal-box">
+    <button id="info-modal-close" title="Close info dialog" aria-label="Close info dialog">✕</button>
+    <div id="info-modal-title">📋 Document Info</div>
+    <div id="info-meta"><div class="struct-empty">Upload a PDF to see its properties</div></div>
+  </div>
+</div>
+ 
+<script>
+'use strict';
+// NOTE: pdf.worker.min.js is loaded via JS (pdfjsLib.GlobalWorkerOptions.workerSrc)
+// and cannot receive SRI enforcement via an HTML integrity attribute — known gap.
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+ 
+/* ══════════════════════════════════════
+   CONSTANTS
+   ══════════════════════════════════════ */
+const DECORATION = {
+  MAX_LINE_THICKNESS_PT: 4,
+  MIN_LINE_WIDTH_PT: 4,
+  STRIKE_VS_UNDERLINE_RATIO: 0.2,
+  PROXIMITY_RATIO: 2.5,
+  RECENT_TEXT_BUFFER: 40,
+  NEAR_TEXT_SEQUENTIAL_LOOKAHEAD: 8,
+  NEAR_TEXT_SEQUENTIAL_MAX_DIST: 80,
+  NEAR_TEXT_SPATIAL_MAX: 120,
+};
+ 
+const OP = {
+  w:2, J:3, j:4, M:5, d:6, gs:9,
+  q:10, Q:11, cm:12, m:13, l:14, c:15, v:16, y:17, h:18, re:19,
+  S:20, s:21, f:22, fStar:23, B:24, BStar:25, n:28, W:29, WStar:30,
+  BT:31, ET:32, Tc:33, Tw:34, Tz:35, TL:36, Tf:37, Tr:38, Ts:39,
+  Td:40, TD:41, Tm:42, Tstar:43, Tj:44, TJ:45, quoteOp:46,
+  CS:50, cs:51, SC:52, SCN:53, sc:54, scn:55, G:56, g:57, RG:58, rg:59, K:60, k:61,
+  sh:62, Do:66, MP:67, DP:68, BMC:69, BDC:70, EMC:71, BX:72, EX:73,
+  formBegin:74, formEnd:75, DoJpg:82, DoMsk:83, DoImg:85, BI_EI:86,
+  constructPath:91,
+};
+ 
+const FILL_OPS  = [OP.f, OP.fStar, OP.B, OP.BStar, OP.S, OP.s];
+const IMAGE_OPS = [OP.Do, OP.DoJpg, OP.DoMsk, OP.DoImg, OP.BI_EI, OP.formBegin, OP.sh];
+ 
+/* ══════════════════════════════════════
+   APPLICATION STATE
+   ══════════════════════════════════════ */
+const AppState = {
+  pdfDoc: null, pageCount: 0, currentPage: 1, renderScale: 1.5,
+  pageViewport: null, processedOps: [], hlCanvas: null, gridCanvas: null,
+  allPageOps: {}, pendingHighlight: null, isPreprocessing: false,
+  _pendingZoomFocus: null, optContentConfig: null,
+  reset() {
+    Object.assign(this, {
+      pdfDoc: null, pageCount: 0, currentPage: 1, renderScale: 1.5,
+      pageViewport: null, processedOps: [], hlCanvas: null, gridCanvas: null,
+      allPageOps: {}, pendingHighlight: null, isPreprocessing: false,
+      _pendingZoomFocus: null, optContentConfig: null,
+    });
+  },
+};
+ 
+/* ══════════════════════════════════════
+   INDEXEDDB PERSISTENCE
+   ══════════════════════════════════════ */
+const _DB_NAME='pdf-explorer-v1', _DB_STORE='pdfs', _DB_KEY='last';
+function _openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(_DB_NAME,1);r.onupgradeneeded=e=>e.target.result.createObjectStore(_DB_STORE);r.onsuccess=e=>res(e.target.result);r.onerror=e=>rej(e.target.error);});}
+async function _saveToCache(buf,filename){
+  try{
+    const db=await _openDB();
+    await new Promise((res,rej)=>{const tx=db.transaction(_DB_STORE,'readwrite');tx.objectStore(_DB_STORE).put({buf,filename,saved:Date.now()},_DB_KEY);tx.oncomplete=res;tx.onerror=e=>rej(e.target.error);});
+  }catch(e){
+    console.warn('PDF cache save failed:',e);
+    showToast('PDF too large to cache — session only');
+  }
+}
+async function _loadFromCache(){try{const db=await _openDB();return await new Promise((res,rej)=>{const r=db.transaction(_DB_STORE,'readonly').objectStore(_DB_STORE).get(_DB_KEY);r.onsuccess=e=>res(e.target.result||null);r.onerror=e=>rej(e.target.error);});}catch(e){return null;}}
+async function _clearCache(){try{const db=await _openDB();await new Promise((res,rej)=>{const tx=db.transaction(_DB_STORE,'readwrite');tx.objectStore(_DB_STORE).delete(_DB_KEY);tx.oncomplete=res;tx.onerror=e=>rej(e.target.error);});}catch(e){}}
+ 
+/* ══════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════ */
+function showToast(msg, duration=2500) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  t.style.animationDuration = (duration/1000)+'s';
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), duration+200);
+}
+ 
+/* ══════════════════════════════════════
+   FLASH / SCROLL HELPERS
+   ══════════════════════════════════════ */
+function scrollRawToCenter(el){
+  const col=document.getElementById('raw-col');
+  if(!col||!el)return;
+  const elRect=el.getBoundingClientRect();
+  const colRect=col.getBoundingClientRect();
+  const target=col.scrollTop+(elRect.top-colRect.top)-col.clientHeight/2+el.offsetHeight/2;
+  col.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+}
+function flashRawLine(idx){
+  const rl=document.querySelector(`.raw-line[data-idx="${idx}"]`);
+  if(!rl)return;
+  document.querySelectorAll('.raw-line.lit').forEach(r=>r.classList.remove('lit'));
+  void rl.offsetWidth;
+  rl.classList.add('lit');
+  scrollRawToCenter(rl);
+}
+function flashTreeLabel(labelEl){
+  document.querySelectorAll('.tree-label.lit').forEach(l=>l.classList.remove('lit'));
+  void labelEl.offsetWidth;
+  labelEl.classList.add('lit');
+}
+function scrollStructToCenter(el){
+  const col=document.getElementById('struct-col');
+  if(!col||!el)return;
+  const elRect=el.getBoundingClientRect();
+  const colRect=col.getBoundingClientRect();
+  const target=col.scrollTop+(elRect.top-colRect.top)-col.clientHeight/2+el.offsetHeight/2;
+  col.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+}
+function flashStructOp(idx){
+  document.querySelectorAll('.top-row.lit').forEach(r=>r.classList.remove('lit'));
+  const row=document.querySelector(`.top-row[data-idx="${idx}"]`);
+  if(!row)return;
+  let el=row.parentElement;
+  while(el){
+    if(el.classList.contains('tree-children')&&el.classList.contains('collapsed')){
+      el.classList.remove('collapsed');
+      const tog=el.previousElementSibling?.querySelector?.('.tree-toggle');
+      if(tog){tog.classList.add('open');tog.textContent='▶';}
+    }
+    if(el.classList.contains('page-section-body')&&el.style.display==='none'){
+      el.style.display='';
+      const hdr=el.previousElementSibling;
+      if(hdr?.classList.contains('page-section-hdr')){
+        const sp=hdr.querySelector('span');if(sp)sp.textContent='▼';
+      }
+    }
+    el=el.parentElement;
+  }
+  void row.offsetWidth;
+  row.classList.add('lit');
+  scrollStructToCenter(row);
+  const allLabels=document.querySelectorAll('.tree-label[data-opstart]');
+  let bestLabel=null,bestRange=Infinity;
+  allLabels.forEach(lbl=>{
+    const s=parseInt(lbl.dataset.opstart),e=parseInt(lbl.dataset.opend);
+    if(!isNaN(s)&&!isNaN(e)&&idx>=s&&idx<=e){
+      const range=e-s;
+      if(range<bestRange){bestRange=range;bestLabel=lbl;}
+    }
+  });
+  if(bestLabel)flashTreeLabel(bestLabel);
+}
+ 
+const flash = {
+  raw: (idx) => flashRawLine(idx),
+  struct: (idx) => flashStructOp(idx),
+};
+ 
+function updateFileLabel(filename, fromCache){
+  const lbl=document.getElementById('file-label');
+  const clr=document.getElementById('clear-cache-btn');
+  if(filename){lbl.textContent=(fromCache?'📌 ':'📄 ')+filename;lbl.title=(fromCache?'Restored from cache: ':'Loaded: ')+filename;lbl.style.display='inline';clr.style.display='inline';}
+  else{lbl.style.display='none';clr.style.display='none';}
+}
+ 
+/* ══════════════════════════════════════
+   OP INFO TABLE
+   ══════════════════════════════════════ */
+const OP_INFO = {
+  2: {pdf:'w',name:'setLineWidth',type:'state',explain:a=>`Set line width to ${n(a[0])} pt for all subsequent stroked paths.`},
+  3: {pdf:'J',name:'setLineCap',type:'state',explain:a=>`Line cap: ${['butt (flat)','round','square (extends)'][a[0]]||a[0]}.`},
+  4: {pdf:'j',name:'setLineJoin',type:'state',explain:a=>`Line join: ${['miter (sharp)','round','bevel (cut)'][a[0]]||a[0]}.`},
+  5: {pdf:'M',name:'setMiterLimit',type:'state',explain:a=>`Miter limit: ${n(a[0])}.`},
+  6: {pdf:'d',name:'setDash',type:'state',explain:a=>`Dash: [${(a[0]||[]).join(',')}] phase ${n(a[1])}. Empty=solid.`},
+  9: {pdf:'gs',name:'setGState',type:'state',explain:a=>`Apply ExtGState /${a[0]} — a named bundle: opacity, blend mode, soft mask, etc. Defined in page /Resources /ExtGState.\n\nCommon uses: setting fill/stroke opacity (ca/CA), enabling soft masks for transparency groups, or switching blend modes (e.g. Multiply for highlights). The next paint operator (f, S, Do…) will use these settings.`},
+  10:{pdf:'q',name:'save',type:'state',explain:()=>`Push all graphics state (CTM, colors, clip, line width) onto a stack — a save point you can return to with Q.\n\nTypically wraps a self-contained drawing sequence: q … set color … draw shape … Q. Everything between q and Q is isolated from the surrounding state.`},
+  11:{pdf:'Q',name:'restore',type:'state',explain:()=>`Pop the state saved by the last q — instantly restores transform, colors, clipping, line width.\n\nAfter Q, any color or transform set inside the q/Q block is forgotten. This is why color setup operators (rg, gs, cm) are always followed eventually by a draw call before the Q.`},
+  12:{pdf:'cm',name:'transform',type:'state',explain:a=>`Concatenate matrix [${a.map(n).join(' ')}] onto CTM. ${matHint(a)}\n\nThe CTM (Current Transformation Matrix) maps user-space coordinates to device pixels. After cm, every subsequent coordinate is interpreted in this new transformed space — until Q restores the previous CTM.`},
+  13:{pdf:'m',name:'moveTo',type:'path',explain:a=>`Move to (${n(a[0])}, ${n(a[1])}) — starts new sub-path without drawing.`},
+  14:{pdf:'l',name:'lineTo',type:'path',explain:a=>`Line to (${n(a[0])}, ${n(a[1])}).`},
+  15:{pdf:'c',name:'curveTo',type:'path',explain:a=>`Bézier to (${n(a[4])},${n(a[5])}).`},
+  16:{pdf:'v',name:'curveTo2',type:'path',explain:a=>`Bézier to (${n(a[2])},${n(a[3])}).`},
+  17:{pdf:'y',name:'curveTo3',type:'path',explain:a=>`Bézier to (${n(a[2])},${n(a[3])}).`},
+  18:{pdf:'h',name:'closePath',type:'path',explain:()=>`Close sub-path — line back to start.`},
+  19:{pdf:'re',name:'rectangle',type:'path',explain:a=>`Define rectangle: x=${n(a[0])}, y=${n(a[1])}, w=${n(a[2])}, h=${n(a[3])} pt.\n\nThis only defines the path geometry — nothing is drawn until f, S, B, etc. is called.`},
+  20:{pdf:'S',name:'stroke',type:'path',explain:()=>`Stroke path with current stroke color and line width.`},
+  21:{pdf:'s',name:'closeStroke',type:'path',explain:()=>`Close and stroke.`},
+  22:{pdf:'f',name:'fill',type:'path',explain:()=>`Fill path with current fill color (non-zero winding). This is the operator that actually paints the shape.`},
+  23:{pdf:'f*',name:'eoFill',type:'path',explain:()=>`Fill with even-odd rule — same as f but uses even-odd winding to determine what counts as "inside" (useful for shapes with holes).`},
+  24:{pdf:'B',name:'fillStroke',type:'path',explain:()=>`Fill then stroke.`},
+  25:{pdf:'B*',name:'eoFillStroke',type:'path',explain:()=>`Fill (even-odd) then stroke.`},
+  28:{pdf:'n',name:'endPath',type:'clip',explain:()=>`End path without painting — nearly always follows W or W* to apply a clip path without drawing the shape.`},
+  29:{pdf:'W',name:'clip',type:'clip',explain:()=>`Set path as clipping region (non-zero winding). Everything painted afterward is masked to this area.`},
+  30:{pdf:'W*',name:'eoClip',type:'clip',explain:()=>`Clip (even-odd). A full-page rect + W* n is Word/Acrobat boilerplate — clips to page boundary, effectively invisible.`},
+  31:{pdf:'BT',name:'beginText',type:'text',explain:()=>`Begin text object. Resets the text matrix.\n\nAll text operators (Tm, Tf, TJ…) must be inside a BT/ET pair.`},
+  32:{pdf:'ET',name:'endText',type:'text',explain:()=>`End text object. Text matrix is abandoned.`},
+  33:{pdf:'Tc',name:'setCharSpacing',type:'text',explain:a=>`Extra ${n(a[0])} pt between every glyph.`},
+  34:{pdf:'Tw',name:'setWordSpacing',type:'text',explain:a=>`Extra ${n(a[0])} pt after space characters.`},
+  35:{pdf:'Tz',name:'setHScale',type:'text',explain:a=>`Horizontal text scale: ${n(a[0])}%.`},
+  36:{pdf:'TL',name:'setLeading',type:'text',explain:a=>`Line leading (gap): ${n(a[0])} pt.`},
+  37:{pdf:'Tf',name:'setFont',type:'text',explain:a=>`Select font /${a[0]} at ${n(a[1])} pt.\n\nFont name maps to a /Font resource in the page /Resources dictionary. That resource contains:\n• The embedded font file (CIDFont, TrueType, or Type1)\n• A /ToUnicode CMap — lookup table translating glyph IDs → Unicode characters\n• Encoding information\n\nFont size in PDF is in points (1pt = 1/72 inch = 0.353mm). The text matrix Tm can also scale text, so the actual rendered size may differ from this value.`},
+  38:{pdf:'Tr',name:'setTextRenderingMode',type:'text',explain:a=>`Render mode: ${['fill','stroke','fill+stroke','invisible','fill+clip','stroke+clip','fill+stroke+clip','clip'][a[0]]||a[0]}.`},
+  39:{pdf:'Ts',name:'setTextRise',type:'text',explain:a=>`Rise ${n(a[0])} pt ${a[0]>=0?'up (super)':'down (sub)'}.`},
+  40:{pdf:'Td',name:'moveText',type:'text',explain:a=>`Move text position by (${n(a[0])}, ${n(a[1])}).`},
+  41:{pdf:'TD',name:'setLeadingMoveText',type:'text',explain:a=>`Move text by (${n(a[0])}, ${n(a[1])}) and set leading.`},
+  42:{pdf:'Tm',name:'setTextMatrix',type:'text',explain:a=>`Set text matrix [${a.map(n).join(' ')}].\n\nThe last two values are the text origin:\n  x = ${n(a[4])} pt from left edge\n  y = ${n(a[5])} pt from BOTTOM of page\n\nPDF coordinates have y=0 at the bottom-left corner of the page, increasing upward. This is the opposite of screen/CSS coordinates where y=0 is the top.\n\n"1 0 0 1" means no rotation/scaling. For an A4 page (841.92 pt tall), y=659 is about 46% from the top.`},
+  43:{pdf:'T*',name:'nextLine',type:'text',explain:()=>`Move to start of next line.`},
+  44:{pdf:'Tj',name:'showString',type:'text',explain:(a,dec)=>`Draw string.\n\n${dec?`The raw bytes in this operator are glyph IDs (not ASCII). PDF.js decodes them using the font's /ToUnicode map and gets:\n  "${dec}"\n\nThis is how the text "${dec}" is stored in the PDF — as a sequence of glyph IDs.`:'CID-encoded glyph data — decode requires font /ToUnicode map.'}`},
+  45:{pdf:'TJ',name:'showSpacedString',type:'text',explain:(a,dec)=>`Draw text with inline kerning.\n\n${dec?`Decoded text: "${dec}"\n\nThe [ ] array has glyph strings interleaved with kerning numbers. Negative numbers nudge glyphs left (tighter), positive right (looser), in thousandths of a text unit.\n\nThis is how virtually all professional PDFs store their text content.`:'CID-encoded — decode requires font.'}`},
+  46:{pdf:"'",name:'nextLineShowString',type:'text',explain:(a,dec)=>`Next line + draw. ${dec?`→ "${dec}"`:''}` },
+  50:{pdf:'CS',name:'setStrokeColorSpace',type:'state',explain:a=>`Stroke color space → /${a[0]}.`},
+  51:{pdf:'cs',name:'setFillColorSpace',type:'state',explain:a=>`Fill color space → /${a[0]}.`},
+  52:{pdf:'SC',name:'setStrokeColor',type:'state',explain:a=>`Stroke color: [${a.map(n).join(', ')}].`},
+  53:{pdf:'SCN',name:'setStrokeColorN',type:'state',explain:a=>`Stroke color (pattern): [${a.map(n).join(', ')}].`},
+  54:{pdf:'sc',name:'setFillColor',type:'state',explain:a=>`Fill color: [${a.map(n).join(', ')}].`},
+  55:{pdf:'scn',name:'setFillColorN',type:'state',explain:a=>`Fill color (pattern): [${a.map(n).join(', ')}].`},
+  56:{pdf:'G',name:'setStrokeGray',type:'state',explain:a=>`Stroke gray: ${n(a[0])} (0=black, 1=white).`},
+  57:{pdf:'g',name:'setFillGray',type:'state',explain:a=>`Fill gray: ${n(a[0])} (0=black, 1=white).`},
+  58:{pdf:'RG',name:'setStrokeRGBColor',type:'state',explain:a=>`Set stroke color to RGB(${a.map(v=>Math.round(v*255)).join(', ')}).\n\nThis only sets the color — nothing is drawn yet. The next S or B operator will stroke paths using this color. Look for the S/B call that follows to see what shape gets this color applied.`},
+  59:{pdf:'rg',name:'setFillRGBColor',type:'state',explain:a=>`Set fill color to RGB(${a.map(v=>Math.round(v*255)).join(', ')}).\n\nThis only sets the color — nothing is drawn yet. The next f, f*, or B operator will fill the current path with this color. In decoration sequences, rg is always step ① — it primes the color for the rectangle that follows (re → f).`},
+  60:{pdf:'K',name:'setStrokeCMYKColor',type:'state',explain:a=>`Set stroke color to CMYK(${a.map(n).join(', ')}).\n\nNothing is drawn until the next S or B operator strokes the current path with this color.`},
+  61:{pdf:'k',name:'setFillCMYKColor',type:'state',explain:a=>`Set fill color to CMYK(${a.map(n).join(', ')}).\n\nNothing is drawn until the next f or B operator fills the current path with this color.`},
+  62:{pdf:'sh',name:'shadingFill',type:'image',explain:a=>`Gradient/shading fill /${a[0]}.`},
+  66:{pdf:'Do',name:'paintXObject',type:'image',explain:a=>`Paint XObject /${a[0]} — image, Form XObject, or pattern.`},
+  67:{pdf:'MP',name:'markPoint',type:'mark',explain:a=>`Mark point /${a[0]}.`},
+  68:{pdf:'DP',name:'markPointProps',type:'mark',explain:a=>`Mark point /${a[0]} with properties.`},
+  69:{pdf:'BMC',name:'beginMarkedContent',type:'mark',explain:a=>`Begin marked content /${a[0]}. Tags this region for accessibility.`},
+  70:{pdf:'BDC',name:'beginMarkedContentProps',type:'mark',explain:(a,dec,rawArgs)=>{
+    const props=rawArgs?.[1],mcid=props?.MCID;
+    return `Begin marked content /${a[0]}${mcid!==undefined?' (MCID '+mcid+')':''}.\n\n${mcid!==undefined?`MCID ${mcid} is an ID that links this content block to the PDF's Structure Tree — an accessibility tree stored in the PDF catalog. The structure tree says what type of element this is (a paragraph, a heading, a span, a figure…) and in what reading order elements appear.\n\nScreen readers use the structure tree to read PDFs in the correct order, translate them to Braille, etc.`:'Properties for accessibility.'}`}},
+  71:{pdf:'EMC',name:'endMarkedContent',type:'mark',explain:()=>`End marked content.`},
+  72:{pdf:'BX',name:'beginCompat',type:'state',explain:()=>`Begin compatibility — unknown ops silently ignored.`},
+  73:{pdf:'EX',name:'endCompat',type:'state',explain:()=>`End compatibility.`},
+  74:{pdf:'(form)',name:'paintFormXObjectBegin',type:'image',explain:()=>`Begin Form XObject — a reusable sub-page being replayed inline.`},
+  75:{pdf:'(form)',name:'paintFormXObjectEnd',type:'image',explain:()=>`End Form XObject.`},
+  82:{pdf:'Do(jpg)',name:'paintJpegXObject',type:'image',explain:a=>`JPEG image /${a[0]} (${a[1]}×${a[2]}px).`},
+  83:{pdf:'Do(msk)',name:'paintImageMaskXObject',type:'image',explain:()=>`1-bit image mask.`},
+  85:{pdf:'Do(img)',name:'paintImageXObject',type:'image',explain:a=>`Raster image /${a[0]}.`},
+  86:{pdf:'BI…EI',name:'paintInlineImageXObject',type:'image',explain:()=>`Inline image — raw pixel data in the content stream.`},
+  91:{pdf:'(path)',name:'constructPath',type:'path',explain:a=>{
+    const so=a[0]||[],sa=a[1]||[];
+    const nm={13:'m',14:'l',15:'c',16:'v',17:'y',18:'h',19:'re'};
+    const seq=so.map(o=>nm[o]||'?').join(' ');
+    const rects=[];let ai=0;
+    for(const s of so){if(s===19) rects.push(`(${n(sa[ai])},${n(sa[ai+1])},${n(sa[ai+2])}×${n(sa[ai+3])})`);ai+={13:2,14:2,15:6,16:4,17:4,18:0,19:4}[s]||0;}
+    return `Bundled path ops [${seq}].${rects.length?' Rects: '+rects.join(' ')+'.':''}`;
+  }},
+};
+ 
+const BADGE_CFG = {mark:{cls:'b-mark',label:'marking'},text:{cls:'b-text',label:'text'},state:{cls:'b-state',label:'state'},path:{cls:'b-path',label:'path'},clip:{cls:'b-clip',label:'clip'},image:{cls:'b-image',label:'image'}};
+ 
+/* ══════════════════════════════════════
+   HELPERS
+   ══════════════════════════════════════ */
+function n(v){if(typeof v!=='number')return String(v??'');return parseFloat(v.toFixed(3)).toString();}
+function matHint([a,b,c,d,e,f]){if(a===1&&b===0&&c===0&&d===1)return `Translation to (${n(e)},${n(f)}).`;if(b===0&&c===0)return `Scale ${n(a)}×${n(d)} + translate.`;return 'Rotation/skew.';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+ 
+function fmtArgs(op,args){
+  if(!args||!args.length)return '';
+  switch(op){
+    case OP.Tm: return args.slice(0,4).map(n).join(' ')+' '+n(args[4])+' '+n(args[5]);
+    case OP.Tf: return `/${args[0]} ${n(args[1])}`;
+    case OP.BDC:{const m=args[1];const id=m?.MCID;return `/${args[0]} <<${id!==undefined?'/MCID '+id:'…'}>>`;}
+    case OP.BMC: case OP.MP: case OP.DP: return `/${args[0]}`;
+    case OP.gs: return `/${args[0]}`;
+    case OP.constructPath:{const nm={13:'m',14:'l',15:'c',16:'v',17:'y',18:'h',19:'re'};return `[${(args[0]||[]).map(o=>nm[o]||'?').join(' ')}]`;}
+    case OP.Tj: case OP.TJ: case OP.quoteOp: return '';
+    default:return args.slice(0,5).map(a=>typeof a==='number'?n(a):typeof a==='string'?'/'+a:'…').join(' ');
+  }
+}
+ 
+/* ══════════════════════════════════════
+   PROCESS OPS — HELPER FUNCTIONS
+   ══════════════════════════════════════ */
+ 
+// Pure function: finds the best-matching text draw for a given rect midpoint Y.
+function matchTextToRect(rectMidY, recentTextDraws, fontSize) {
+  let bestMatch = null, bestYDist = Infinity;
+  for (const draw of recentTextDraws) {
+    const yDist = Math.abs(draw.y - rectMidY);
+    const threshold = draw.fontSize * DECORATION.PROXIMITY_RATIO;
+    if (yDist < bestYDist && yDist <= threshold) { bestYDist = yDist; bestMatch = draw; }
+  }
+  return { bestMatch, bestYDist: bestMatch ? bestYDist : Infinity };
+}
+ 
+/*
+ * KNOWN LIMITATIONS of this classifier:
+ * 1. CTM not applied: tm.e/tm.f used directly; rotated/scaled text positions incorrectly.
+ * 2. Stroked lines missed: thin horizontal `m…l…S` strokes take a different code path.
+ * 3. Multi-rect paths: only evaluates lastRects[0]; multi-rect paths partially handled.
+ * 4. Color-on-white: white fill on white background may be misclassified as decoration.
+ * 5. Form XObjects (Do/op 74): content inside replayed XObjects is opaque to this pass.
+ */
+// Pure function: classifies a thin filled rect as strikethrough, underline, or drawn line.
+// Returns a visualHint object if the rect qualifies, or null otherwise.
+function classifyDecoration(r, recentTextDraws, fontSize, fillRGB, fillGray, result, info, fillOpIdx) {
+  const thickness = Math.abs(r.h);
+  if (!(thickness > 0 && thickness < DECORATION.MAX_LINE_THICKNESS_PT && Math.abs(r.w) > DECORATION.MIN_LINE_WIDTH_PT)) return null;
+ 
+  const rectMidY = r.y + r.h / 2;
+  const { bestMatch, bestYDist } = matchTextToRect(rectMidY, recentTextDraws, fontSize);
+  const distFromText = bestMatch ? bestYDist : Infinity;
+ 
+  let kind, kindLabel, aboveBaseline = null;
+  if (bestMatch !== null) {
+    aboveBaseline = rectMidY - bestMatch.y;
+    kind = aboveBaseline > bestMatch.fontSize * DECORATION.STRIKE_VS_UNDERLINE_RATIO ? 'mid-text line' : 'baseline line';
+    kindLabel = kind === 'mid-text line' ? 'Mid-text line' : 'Baseline line';
+  } else {
+    kind = 'drawn line';
+    kindLabel = 'Drawn line';
+  }
+ 
+  let reIdx = -1;
+  for (let k = result.length - 1; k >= Math.max(0, result.length - 6); k--) {
+    if (result[k].pdf === 're' || result[k].pdf === '(path)') { reIdx = k; break; }
+  }
+  let colorIdx = -1;
+  for (let k = result.length - 1; k >= Math.max(0, result.length - 10); k--) {
+    if (['rg','g','k','sc','scn','cs'].includes(result[k].pdf)) { colorIdx = k; break; }
+  }
+ 
+  const colorStr = fillRGB ? `RGB(${fillRGB.map(v => Math.round(v * 255)).join(', ')})` : `Gray ${n(fillGray)}`;
+  const seqParts = [];
+  if (colorIdx >= 0) seqParts.push(`① ${result[colorIdx].pdf} — set color (${colorStr})`);
+  if (reIdx >= 0) seqParts.push(`② re — define rectangle: x=${n(r.x)}, y=${n(r.y)}, w=${n(r.w)}, h=${n(thickness)} pt`);
+  const visualNote = kind === 'mid-text line' ? '(visually: strikethrough)' : kind === 'baseline line' ? '(visually: underline)' : '';
+  seqParts.push(`③ ${info?.pdf} — fill it → ${kindLabel.toLowerCase()} appears ${visualNote}`.trim());
+ 
+  const proximityThreshold = bestMatch ? bestMatch.fontSize * DECORATION.PROXIMITY_RATIO : fontSize * DECORATION.PROXIMITY_RATIO;
+  return {
+    kind, kindLabel, thickness, rect: r, colorStr, reIdx, colorIdx, fillOpIdx,
+    seqStr: seqParts.join('\n'), fontSize,
+    rectMidY,
+    nearbyTextY: bestMatch?.y ?? null,
+    nearbyText: bestMatch?.text ?? null,
+    aboveBaseline,
+    distFromText,
+    proximityThreshold,
+    strikeThreshold: bestMatch ? bestMatch.fontSize * DECORATION.STRIKE_VS_UNDERLINE_RATIO : fontSize * DECORATION.STRIKE_VS_UNDERLINE_RATIO,
+  };
+}
+ 
+/* ══════════════════════════════════════
+   PROCESS OPS
+   ══════════════════════════════════════ */
+function processOps(fnArray,argsArray,textItems,pageNum){
+  const rawItems=(textItems||[]).map(it=>({
+    tx:it.transform[4],ty:it.transform[5],w:it.width,h:it.height,str:it.str
+  }));
+ 
+  const textLookup=[];
+  for(const it of rawItems){
+    const words=it.str.split(/(?<=\S)(?=\s)|(?<=\s)(?=\S)/);
+    if(words.length<=1||it.w===0){textLookup.push({...it,used:false});continue;}
+    let xOff=0;
+    for(const w of words){
+      const frac=w.length/it.str.length;
+      const ww=it.w*frac;
+      textLookup.push({tx:it.tx+xOff,ty:it.ty,w:ww,h:it.h,str:w.trim(),used:false});
+      xOff+=ww;
+    }
+  }
+ 
+  let _tqIdx=0;
+  function nearText(tx,ty){
+    for(let k=0;k<DECORATION.NEAR_TEXT_SEQUENTIAL_LOOKAHEAD;k++){
+      const t=textLookup[_tqIdx+k];
+      if(!t||t.used||!t.str)continue;
+      const d=Math.sqrt((t.tx-tx)**2+(t.ty-ty)**2);
+      if(d<DECORATION.NEAR_TEXT_SEQUENTIAL_MAX_DIST){t.used=true;_tqIdx=_tqIdx+k+1;return t;}
+    }
+    let best=null,bd=Infinity;
+    for(const t of textLookup){
+      if(t.used||!t.str)continue;
+      const d=(t.tx-tx)**2+(t.ty-ty)**2;
+      if(d<bd&&d<DECORATION.NEAR_TEXT_SPATIAL_MAX**2){best=t;bd=d;}
+    }
+    if(best)best.used=true;
+    return best;
+  }
+ 
+  const ctmStack=[{a:1,b:0,c:0,d:1,e:0,f:0}];
+  let tm={a:1,b:0,c:0,d:1,e:0,f:0},fontSize=12,fillRGB=null,fillGray=0,lastRects=[],inText=false;
+  const recentTextDraws=[];
+  const applyM=(m1,m2)=>({a:m1.a*m2.a+m1.b*m2.c,b:m1.a*m2.b+m1.b*m2.d,c:m1.c*m2.a+m1.d*m2.c,d:m1.c*m2.b+m1.d*m2.d,e:m1.e*m2.a+m1.f*m2.c+m2.e,f:m1.e*m2.b+m1.f*m2.d+m2.f});
+  const ctm=()=>ctmStack[ctmStack.length-1];
+  const result=[];
+  const fontsUsed=new Map();
+ 
+  for(let i=0;i<fnArray.length;i++){
+    const op=fnArray[i],args=argsArray[i]||[];
+    const info=OP_INFO[op];
+    if(op===OP.q)ctmStack.push({...ctm()});
+    else if(op===OP.Q&&ctmStack.length>1)ctmStack.pop();
+    else if(op===OP.cm)ctmStack[ctmStack.length-1]=applyM(ctm(),{a:args[0],b:args[1],c:args[2],d:args[3],e:args[4],f:args[5]});
+    else if(op===OP.Tf){fontSize=args[1];const fn=args[0]||'?';if(!fontsUsed.has(fn))fontsUsed.set(fn,[]);fontsUsed.get(fn).push(args[1]);}
+    else if(op===OP.BT){tm={a:1,b:0,c:0,d:1,e:0,f:0};inText=true;}
+    else if(op===OP.ET)inText=false;
+    else if(op===OP.Tm)tm={a:args[0],b:args[1],c:args[2],d:args[3],e:args[4],f:args[5]};
+    else if(op===OP.Td){tm={...tm,e:tm.e+args[0],f:tm.f+args[1]};}
+    else if(op===OP.TD){tm={...tm,e:tm.e+args[0],f:tm.f+args[1]};}
+    else if(op===OP.g){fillGray=args[0];fillRGB=null;}
+    else if(op===OP.rg){fillRGB=[...args];fillGray=0;}
+    if(op===OP.re)lastRects=[{x:args[0],y:args[1],w:args[2],h:args[3]}];
+    else if(op===OP.constructPath){const so=args[0]||[],sa=args[1]||[];let ai=0;lastRects=[];for(const s of so){if(s===19)lastRects.push({x:sa[ai],y:sa[ai+1],w:sa[ai+2],h:sa[ai+3]});ai+={13:2,14:2,15:6,16:4,17:4,18:0,19:4}[s]||0;}}
+ 
+    let highlight=null,decodedText=null,visualHint=null;
+ 
+    if(op===OP.Tm)highlight={type:'cursor',tx:args[4],ty:args[5]};
+    else if((op===OP.Tj||op===OP.TJ||op===OP.quoteOp)&&inText){
+      const ti=nearText(tm.e,tm.f);
+      decodedText=ti?.str||null;
+      const w=ti?ti.w:fontSize*3.5,h=ti?Math.max(ti.height,4):fontSize*1.3;
+      highlight={type:'text',tx:tm.e,ty:tm.f,w,h};
+      recentTextDraws.push({y:tm.f,x:tm.e,text:decodedText,fontSize});
+      if(recentTextDraws.length>DECORATION.RECENT_TEXT_BUFFER)recentTextDraws.shift();
+    }
+    else if(FILL_OPS.includes(op)&&lastRects.length){
+      const color=fillRGB?{r:Math.round(fillRGB[0]*255),g:Math.round(fillRGB[1]*255),b:Math.round(fillRGB[2]*255)}:{r:Math.round((1-fillGray)*255),g:Math.round((1-fillGray)*255),b:Math.round((1-fillGray)*255)};
+      highlight={type:'rects',rects:lastRects,color,isStroke:op===OP.S||op===OP.s};
+      for(const r of lastRects){
+        const hint=classifyDecoration(r,recentTextDraws,fontSize,fillRGB,fillGray,result,info,i);
+        if(hint){
+          visualHint=hint;
+          if(hint.reIdx>=0)result[hint.reIdx].decorHint=hint;
+          if(hint.colorIdx>=0)result[hint.colorIdx].decorHint=hint;
+          break;
+        }
+      }
+    }
+    else if((op===OP.re||op===OP.constructPath)&&lastRects.length)highlight={type:'rects',rects:lastRects,dim:true};
+    else if(IMAGE_OPS.includes(op))highlight={type:'image',m:ctm()};
+    if(!highlight&&inText&&tm.e!==0&&tm.f!==0)highlight={type:'cursor',tx:tm.e,ty:tm.f,faint:true};
+ 
+    const searchText=[info?.pdf||`op${op}`,info?.name||'',fmtArgs(op,args),decodedText||''].join(' ').toLowerCase();
+    const explainFn=info?.explain;
+    const explain=explainFn?(op===OP.BDC?explainFn(args,decodedText,args):explainFn(args,decodedText)):`Unknown op ${op}.`;
+    result.push({idx:i,page:pageNum||1,pdf:info?.pdf??`op${op}`,name:info?.name??`unknown_${op}`,type:info?.type??'state',args:fmtArgs(op,args),rawArgs:args,decodedText,highlight,visualHint,searchText,explain});
+  }
+  result._fontsUsed=fontsUsed;
+  return result;
+}
+ 
+/* ══════════════════════════════════════
+   RAW STREAM RECONSTRUCTION
+   ══════════════════════════════════════ */
+function reconstructRaw(ops){
+  const lines=[];
+  let indent=0;
+  const pad=()=>'  '.repeat(indent);
+  for(const op of ops){
+    if(op.pdf==='EMC'&&indent>0)indent--;
+    let line='';
+    if(op.decodedText){
+      line=`${pad()}[<glyph-data>] ${op.pdf}  % "${op.decodedText}"`;
+    } else if(op.pdf==='BDC'||op.pdf==='BMC'){
+      line=`${pad()}${op.args} ${op.pdf}`;
+    } else {
+      const a=op.args;
+      line=`${pad()}${a?a+' ':''}${op.pdf}`;
+    }
+    lines.push(line);
+    if(op.pdf==='BDC'||op.pdf==='BMC')indent++;
+  }
+  return lines;
+}
+ 
+function buildRawHTML(lines,ops){
+  const parts=[];
+  for(let i=0;i<lines.length;i++){
+    const op=ops[i],line=lines[i];
+    if(!op)continue;
+    let inner='';
+    if(op.decodedText){
+      const m=line.match(/^(\s*)\[<glyph-data>\] (\S+)/);
+      const indent=m?m[1]:'';
+      const kw=m?m[2]:op.pdf;
+      inner=`${esc(indent)}<span class="rw-str">[glyph]</span> <span class="rw-op">${esc(kw)}</span>  <span class="rw-arrow">→</span> <span class="rw-decoded">"${esc(op.decodedText)}"</span>`;
+    } else {
+      let cls='';
+      if(op.type==='mark')cls='rw-mark';
+      else if(op.type==='text')cls='rw-num';
+      else if(op.type==='path'&&['f','f*','S','B','B*','s','b'].includes(op.pdf))cls='rw-op';
+      inner=cls?`<span class="${cls}">${esc(line)}</span>`:esc(line);
+    }
+    const dh=op.visualHint||op.decorHint;
+    const dhColor=dh?(dh.kind==='drawn line'?'color:#a0b0c0;background:#1a2030':dh.kind==='mid-text line'?'color:#d09060;background:#2a1800':'color:#90a8d0;background:#101828'):'';
+    const decorTag=dh?` <span style="font-size:9px;${dhColor};border-radius:3px;padding:0 4px;margin-left:4px" title="${esc(dh.kindLabel)} — part of a 3-step sequence">${dh.kindLabel.toLowerCase()}</span>`:'';
+    const copyText=op.decodedText?`${lines[i]} → "${op.decodedText}"`:lines[i];
+    parts.push(`<div class="raw-line" data-idx="${op.idx}" data-type="${op.type||'state'}" data-copy="${esc(copyText)}">${inner}${decorTag}<button class="op-copy-btn" title="Copy operator" aria-label="Copy operator">⎘</button></div>`);
+  }
+  setTimeout(updateOpLayerCounts, 0);
+  return parts.join('');
+}
+ 
+/* ══════════════════════════════════════
+   STRUCTURE TREE
+   ══════════════════════════════════════ */
+function buildStructTree(ops){
+  const root={label:'page',tag:'page',mcid:null,children:[],opIdxStart:null,opIdxEnd:null,textContent:'',hasGraphics:false};
+  const stack=[root];
+  for(const op of ops){
+    const cur=stack[stack.length-1];
+    if(op.pdf==='BDC'||op.pdf==='BMC'){
+      const mm=op.args.match(/MCID\s+(\d+)/),tm=op.args.match(/^\/(\w+)/);
+      const node={label:tm?tm[1]:'?',tag:tm?tm[1].toLowerCase():'?',mcid:mm?parseInt(mm[1]):null,children:[],opIdxStart:op.idx,opIdxEnd:null,textContent:'',hasGraphics:false};
+      cur.children.push(node);stack.push(node);
+    } else if(op.pdf==='EMC'){
+      const node=stack[stack.length-1];
+      if(node!==root)node.opIdxEnd=op.idx;
+      if(stack.length>1)stack.pop();
+    } else {
+      const node=stack[stack.length-1];
+      if(op.decodedText){node.textContent+=op.decodedText;for(let k=stack.length-2;k>=0;k--)stack[k].textContent+=op.decodedText;}
+      if(['f','f*','B','B*','S','s'].includes(op.pdf))node.hasGraphics=true;
+    }
+  }
+  return root;
+}
+ 
+function tagCls(tag){const t=tag.toLowerCase();if(t==='span'||t==='link')return 'tt-span';if(t==='p'||t.startsWith('h'))return 'tt-p';if(t==='artifact')return 'tt-art';if(t==='figure'||t==='formula')return 'tt-fig';return 'tt-oth';}
+ 
+function buildNodeOpsPanel(node, depth, pageOps){
+  const ops=pageOps||AppState.processedOps;
+  if(node.opIdxStart===null||node.opIdxEnd===null)return null;
+  const nodeOps=ops.slice(node.opIdxStart,node.opIdxEnd+1);
+  if(!nodeOps.length)return null;
+  const opsDiv=document.createElement('div');
+  opsDiv.className='tree-ops-panel';
+  opsDiv.style.paddingLeft=(depth*14+26)+'px';
+  const targetPage=(nodeOps[0]?.page)||AppState.currentPage;
+ 
+  const LAYER_LABELS={
+    mark:   {icon:'🏷',  label:'Accessibility marking',  tip:'Tags this region for screen readers (WCAG/PDF/UA). Not visually rendered.'},
+    state:  {icon:'⚙',  label:'Graphics state',         tip:'Sets up rendering parameters: font, color, transform, opacity. Nothing drawn yet.'},
+    clip:   {icon:'✂',  label:'Clipping layer',          tip:'Defines a visible area mask. Content outside this region will be invisible.'},
+    text:   {icon:'📝', label:'Text layer',              tip:'Positions and draws glyphs using the current font and text matrix.'},
+    path:   {icon:'✏',  label:'Path / graphics layer',  tip:'Constructs and paints vector shapes (rectangles, lines, curves).'},
+    image:  {icon:'🖼',  label:'Image layer',            tip:'Paints a raster image or reusable XObject.'},
+  };
+  let lastType=null;
+  for(const op of nodeOps){
+    if(op.type!==lastType){
+      const ll=LAYER_LABELS[op.type];
+      if(ll&&lastType!==null){
+        const div=document.createElement('div');
+        div.style.cssText='margin:4px 0 2px;border-top:1px solid #1e1e1e;padding-top:3px;display:flex;align-items:center;gap:5px;';
+        const icon=document.createElement('span');icon.textContent=ll.icon;icon.style.cssText='font-size:10px;opacity:0.6';
+        const lbl=document.createElement('span');lbl.style.cssText='font-size:9px;color:var(--text-hint);font-style:italic;letter-spacing:0.03em';lbl.textContent=ll.label;
+        const tipEl=document.createElement('span');tipEl.title=ll.tip;tipEl.style.cssText='font-size:9px;color:var(--text-hint);cursor:help';tipEl.textContent='ⓘ';
+        div.append(icon,lbl,tipEl);opsDiv.appendChild(div);
+      }
+      lastType=op.type;
+    }
+ 
+    const badge=BADGE_CFG[op.type]||BADGE_CFG.state;
+    const row=document.createElement('div');row.className='top-row';row.dataset.idx=op.idx;
+    const bdg=document.createElement('span');bdg.className='top-badge '+badge.cls;bdg.textContent=badge.label;
+    const code=document.createElement('code');code.className='top-code';
+    if(op.decodedText)code.innerHTML=esc(op.pdf)+' <span class="decoded-str">"'+esc(op.decodedText)+'"</span>';
+    else code.textContent=op.pdf+(op.args?' '+op.args:'');
+    const dh2=op.visualHint||op.decorHint;
+    if(dh2){const hint=document.createElement('span');const dhc2=dh2.kind==='drawn line'?'color:#a0b0c0;background:#1a2030':dh2.kind==='mid-text line'?'color:#d09060;background:#2a1800':'color:#90a8d0;background:#101828';hint.style.cssText=`font-size:9px;${dhc2};border-radius:3px;padding:0 4px;margin-left:6px;cursor:help`;hint.textContent=dh2.kindLabel.toLowerCase();hint.title=dh2.seqStr;code.appendChild(hint);}
+    row.append(bdg,code);
+    row.addEventListener('mouseenter',()=>{
+      document.querySelectorAll('.top-row.lit').forEach(r=>r.classList.remove('lit'));
+      row.classList.add('lit');
+      activateOp(op);
+      if(targetPage===AppState.currentPage&&AppState.hlCanvas&&AppState.pageViewport)drawHighlight(op.highlight,AppState.hlCanvas,AppState.pageViewport);
+      if(targetPage===AppState.currentPage)flashRawLine(op.idx);
+    });
+    row.addEventListener('click',e=>{e.stopPropagation();navigateToAndHighlight(targetPage,op.idx);});
+    opsDiv.appendChild(row);
+  }
+  return opsDiv;
+}
+ 
+function makeNode(node,depth,pageNum,pageOps){
+  const pOps=pageOps||AppState.processedOps;
+  const pNum=pageNum||AppState.currentPage;
+  const wrap=document.createElement('div');wrap.className='tree-node';
+  const label=document.createElement('div');label.className='tree-label';label.style.paddingLeft=(depth*14+6)+'px';if(node.opIdxStart!==null)label.dataset.opstart=node.opIdxStart;if(node.opIdxEnd!==null)label.dataset.opend=node.opIdxEnd;
+  const tog=document.createElement('span');tog.className='tree-toggle'+(node.children.length?'':' leaf');tog.textContent=node.children.length?'▶':' ';label.appendChild(tog);
+  const tc=document.createElement('span');tc.className='tree-tag '+tagCls(node.tag);tc.textContent='/'+node.label;label.appendChild(tc);
+  if(node.mcid!==null){const mc=document.createElement('span');mc.className='tree-mcid';mc.textContent='MCID '+node.mcid;label.appendChild(mc);}
+  const contentSpan=document.createElement('span');
+  if(node.textContent&&node.textContent.trim()){contentSpan.className='tree-text';contentSpan.textContent='"'+node.textContent.trim().substring(0,45)+(node.textContent.length>45?'…':'')+'"';}
+  else if(node.hasGraphics){contentSpan.className='tree-text gfx';contentSpan.textContent='[graphics/shapes]';}
+  else{contentSpan.className='tree-text empty';contentSpan.textContent='[empty]';}
+  label.appendChild(contentSpan);
+  const opCount=node.opIdxEnd!==null?(node.opIdxEnd-node.opIdxStart+1):0;
+  if(opCount>0){const cnt=document.createElement('span');cnt.className='tree-cnt';cnt.textContent=opCount+' ops';label.appendChild(cnt);}
+  if(pNum!==AppState.currentPage){const pb=document.createElement('span');pb.className='page-badge';pb.textContent='p.'+pNum;label.appendChild(pb);}
+  wrap.appendChild(label);
+ 
+  const opsDiv=buildNodeOpsPanel(node,depth,pOps);
+  if(opsDiv){opsDiv.classList.add('open');wrap.appendChild(opsDiv);}
+ 
+  const childWrap=document.createElement('div');childWrap.className='tree-children';
+  let expanded=true;
+  if(node.children.length){
+    tog.classList.add('open');
+    tog.addEventListener('click',e=>{e.stopPropagation();expanded=!expanded;childWrap.classList.toggle('collapsed',!expanded);tog.classList.toggle('open',expanded);});
+  }
+  for(const child of node.children)childWrap.appendChild(makeNode(child,depth+1,pNum,pOps));
+  wrap.appendChild(childWrap);
+  label.addEventListener('click',()=>{
+    flashTreeLabel(label);
+    if(node.opIdxStart!==null){navigateToAndHighlight(pNum,node.opIdxStart);}
+  });
+  return wrap;
+}
+ 
+function renderStructTree(root,curPageNum){
+  const structPanel=document.getElementById('struct-panel');
+  structPanel.innerHTML='';
+ 
+  const knownPages=Object.keys(AppState.allPageOps).map(Number).sort((a,b)=>a-b);
+  const multiPage=AppState.pageCount>1&&knownPages.length>1;
+ 
+  if(multiPage){
+    const hdr=document.createElement('div');hdr.className='struct-hdr';
+    hdr.textContent='Document structure — all pages · click items to navigate';
+    structPanel.appendChild(hdr);
+    for(const pn of knownPages){
+      const pRoot=buildStructTree(AppState.allPageOps[pn]);
+      const isCurrent=(pn===curPageNum);
+      const secHdr=document.createElement('div');
+      secHdr.className='page-section-hdr'+(isCurrent?' current-page':'');
+      const tog=document.createElement('span');tog.textContent=isCurrent?'▼':'▶';tog.style.fontSize='9px';
+      const lbl=document.createElement('span');lbl.textContent=`Page ${pn}`;
+      const badge=document.createElement('span');badge.className='page-badge'+(isCurrent?' current':'');badge.textContent=isCurrent?'current':'p.'+pn;
+      secHdr.append(tog,lbl,badge);
+      if(pRoot.textContent.trim()){const prev=document.createElement('span');prev.style.cssText='font-size:10px;color:#3a5a3a;font-family:Fira Code,monospace;margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;display:inline-block';prev.textContent='"'+pRoot.textContent.trim().substring(0,30)+(pRoot.textContent.length>30?'…':'')+'"';secHdr.appendChild(prev);}
+      const secBody=document.createElement('div');
+      secBody.className='page-section-body';
+      secBody.style.display=isCurrent?'':'none';
+      let bodyExpanded=isCurrent;
+      secHdr.addEventListener('click',()=>{
+        bodyExpanded=!bodyExpanded;
+        tog.textContent=bodyExpanded?'▼':'▶';
+        secBody.style.display=bodyExpanded?'':'none';
+      });
+      if(!pRoot.children.length){
+        const empty=document.createElement('div');empty.style.cssText='padding:8px 20px;color:#333;font-size:12px';empty.textContent='No tagged structure';secBody.appendChild(empty);
+      } else {
+        for(const child of pRoot.children)secBody.appendChild(makeNode(child,0,pn,AppState.allPageOps[pn]));
+      }
+      structPanel.appendChild(secHdr);
+      structPanel.appendChild(secBody);
+    }
+    if(knownPages.length<AppState.pageCount){
+      const loading=document.createElement('div');loading.style.cssText='padding:8px 14px;font-size:11px;color:var(--text-hint)';loading.textContent='⏳ Loading other pages…';structPanel.appendChild(loading);
+    }
+    return;
+  }
+ 
+  if(!root.children.length){
+    structPanel.innerHTML='<div class="struct-empty">No marked content (BDC/EMC) found.<br><span style="font-size:11px;color:#2a2a2a">PDF may not have accessibility tags.</span></div>';
+    return;
+  }
+  const hdr=document.createElement('div');hdr.className='struct-hdr';
+  hdr.textContent='Document structure tree — click ⚙ ops to see drawing commands inside each node';
+  structPanel.appendChild(hdr);
+  for(const child of root.children)structPanel.appendChild(makeNode(child,0,curPageNum,AppState.processedOps));
+}
+ 
+/* ══════════════════════════════════════
+   INFO / METADATA PANEL
+   ══════════════════════════════════════ */
+async function buildInfoPanel(page, metadata, ops){
+  const panel=document.getElementById('info-meta');
+  panel.innerHTML='';
+  const vp=page.getViewport({scale:1});
+  const pw=vp.width,ph=vp.height;
+  const orientStr=pw>ph?'Landscape':'Portrait';
+  const ptToMm=v=>(v*25.4/72).toFixed(1);
+ 
+  function section(title){const d=document.createElement('div');d.className='info-section';const h=document.createElement('h3');h.textContent=title;d.appendChild(h);panel.appendChild(d);return d;}
+  function row(s,k,v,cls=''){const r=document.createElement('div');r.className='info-row';const kd=document.createElement('span');kd.className='info-key';kd.textContent=k;const vd=document.createElement('span');vd.className='info-val'+(cls?' '+cls:'');vd.textContent=v;r.append(kd,vd);s.appendChild(r);}
+ 
+  const st=section('📊 Stream Statistics');
+  const typeCounts={mark:0,text:0,state:0,path:0,clip:0,image:0,other:0};
+  for(const op of ops){const t=typeCounts[op.type]!==undefined?op.type:'other';typeCounts[t]++;}
+  row(st,'Total operators',ops.length);
+  row(st,'Pages in document',AppState.pageCount);
+  const typeLabels={mark:'marking',text:'text',state:'state',path:'path',clip:'clip',image:'image'};
+  for(const [t,lbl] of Object.entries(typeLabels)){if(typeCounts[t])row(st,lbl+' ops',typeCounts[t]);}
+  if(typeCounts.other)row(st,'other ops',typeCounts.other);
+  row(st,'Unique fonts',ops._fontsUsed?.size||0);
+  const colorSet=new Set();for(const op of ops){if(op.rawArgs){if(op.pdf==='g')colorSet.add('g:'+op.rawArgs[0]);else if(op.pdf==='rg')colorSet.add('rg:'+op.rawArgs.join(','));else if(op.pdf==='k')colorSet.add('k:'+op.rawArgs.join(','));}}
+  row(st,'Unique fill colors',colorSet.size);
+ 
+  const pg=section('📐 Page Geometry');
+  row(pg,'Width',`${n(pw)} pt  = ${ptToMm(pw)} mm`,'highlight');
+  row(pg,'Height',`${n(ph)} pt  = ${ptToMm(ph)} mm`,'highlight');
+  row(pg,'Orientation',orientStr);
+  const knownSizes=[{n:'A4',w:595.28,h:841.89},{n:'A3',w:841.89,h:1190.55},{n:'Letter',w:612,h:792},{n:'Legal',w:612,h:1008}];
+  const matched=knownSizes.find(s=>Math.abs(s.w-pw)<2&&Math.abs(s.h-ph)<2||Math.abs(s.w-ph)<2&&Math.abs(s.h-pw)<2);
+  if(matched)row(pg,'Paper size',matched.n);
+  row(pg,'Unit system','Points (1 pt = 1/72 inch = 0.353 mm)');
+ 
+  const exp=document.createElement('div');exp.className='coord-explainer';
+  exp.innerHTML=`<strong>How PDF coordinates work:</strong><br>
+Origin (0, 0) is at the <strong>bottom-left</strong> of the page.<br>
+X increases rightward, Y increases <strong>upward</strong>.<br>
+So y = ${n(ph)} is the <em>top</em> of this page, and y = 0 is the <em>bottom</em>.<br>
+This is the opposite of screen/CSS where y=0 is the top.<br><br>
+When you see <code>Tm 1 0 0 1 70 660</code>, the text is at x=70pt (left margin), y=660pt — which is about ${Math.round((1-660/ph)*100)}% from the top.`;
+  const pg2=section('🧭 Coordinate System');pg2.appendChild(exp);
+ 
+  const ms=section('📄 Document Metadata');
+  const info=metadata?.info||{};
+  const fields=[['Title','Title'],['Author','Author'],['Subject','Subject'],['Keywords','Keywords'],['Creator','Creator (application)'],['Producer','Producer (PDF library)'],['CreationDate','Created'],['ModDate','Modified']];
+  let any=false;
+  for(const [k,label] of fields){if(info[k]){row(ms,label,info[k]);any=true;}}
+  if(!any){const nr=document.createElement('div');nr.style.cssText='font-size:12px;color:#444;padding:4px 0';nr.textContent='No document metadata found.';ms.appendChild(nr);}
+ 
+  const fs=section('🔤 Fonts Used');
+  const fontsUsed=ops._fontsUsed||new Map();
+  if(fontsUsed.size===0){const nr=document.createElement('div');nr.style.cssText='font-size:12px;color:#444;padding:4px 0';nr.textContent='No font info extracted.';fs.appendChild(nr);}
+  else{
+    for(const [fname,sizes] of fontsUsed){
+      const uniqueSizes=[...new Set(sizes)].sort((a,b)=>a-b).map(s=>s+'pt').join(', ');
+      row(fs,'/'+fname,uniqueSizes,'highlight');
+    }
+    const nr=document.createElement('div');nr.style.cssText='font-size:11px;color:#555;padding:4px 0';nr.textContent='Font names are internal PDF resource names. Actual font name is in /BaseFont inside the font object.';fs.appendChild(nr);
+  }
+ 
+  const cs=section('🎨 Colors Detected');
+  const colorsFound=new Set();
+  for(const op of ops){
+    if(op.rawArgs){
+      if(op.pdf==='g')colorsFound.add(`Gray ${n(op.rawArgs[0])}`);
+      else if(op.pdf==='rg')colorsFound.add(`RGB(${op.rawArgs.map(v=>Math.round(v*255)).join(',')})`);
+      else if(op.pdf==='k')colorsFound.add(`CMYK(${op.rawArgs.map(n).join(',')})`);
+    }
+  }
+  if(colorsFound.size===0){const nr=document.createElement('div');nr.style.cssText='font-size:12px;color:#444;padding:4px 0';nr.textContent='No color operators detected.';cs.appendChild(nr);}
+  else for(const c of colorsFound) row(cs,'Fill',c);
+}
+ 
+/* ══════════════════════════════════════
+   HIGHLIGHT CANVAS
+   ══════════════════════════════════════ */
+function drawHighlight(hl,canvas,viewport){
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!hl)return;
+  const [va,vb,vc,vd,ve,vf]=viewport.transform;
+  const scale=Math.abs(va);
+  const toC=(px,py)=>({x:va*px+vc*py+ve,y:vb*px+vd*py+vf});
+  ctx.save();
+  if(hl.type==='cursor'){
+    const p=toC(hl.tx,hl.ty);
+    const alpha=hl.faint?0.35:0.75;
+    ctx.beginPath();ctx.arc(p.x,p.y,hl.faint?3:5,0,Math.PI*2);ctx.fillStyle=`rgba(80,160,255,${alpha})`;ctx.fill();
+    if(!hl.faint){
+      ctx.beginPath();ctx.arc(p.x,p.y,13,0,Math.PI*2);ctx.strokeStyle='rgba(80,160,255,0.3)';ctx.lineWidth=2;ctx.stroke();
+    }
+    ctx.setLineDash([3,3]);ctx.strokeStyle=`rgba(80,160,255,${hl.faint?0.12:0.2})`;ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(p.x-40,p.y);ctx.lineTo(p.x+40,p.y);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(p.x,p.y-40);ctx.lineTo(p.x,p.y+40);ctx.stroke();ctx.setLineDash([]);
+    if(!hl.faint){ctx.fillStyle='rgba(80,160,255,0.85)';ctx.font='10px monospace';ctx.fillText(`(${n(hl.tx)}, ${n(hl.ty)})`,p.x+15,p.y-8);}
+  } else if(hl.type==='text'){
+    const p=toC(hl.tx,hl.ty);const w=hl.w*scale,h=hl.h*scale;
+    ctx.fillStyle='rgba(80,160,255,0.12)';ctx.fillRect(p.x,p.y-h*0.85,w,h);
+    ctx.strokeStyle='rgba(80,160,255,0.65)';ctx.lineWidth=1.5;ctx.strokeRect(p.x,p.y-h*0.85,w,h);
+    ctx.setLineDash([4,3]);ctx.strokeStyle='rgba(80,160,255,0.4)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x+w,p.y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='rgba(80,160,255,0.6)';ctx.font='9px monospace';ctx.fillText('baseline',p.x+w+4,p.y+3);
+  } else if(hl.type==='rects'){
+    for(const r of hl.rects){
+      const p1=toC(r.x,r.y),p2=toC(r.x+r.w,r.y+r.h);
+      const rx=Math.min(p1.x,p2.x),ry=Math.min(p1.y,p2.y),rw=Math.abs(p2.x-p1.x),rh=Math.abs(p2.y-p1.y);
+      const fc=hl.dim?'rgba(255,200,80,0.06)':hl.isStroke?'rgba(100,220,100,0.07)':`rgba(${(hl.color||{r:255,g:80,b:80}).r},${(hl.color||{r:255,g:80,b:80}).g},${(hl.color||{r:255,g:80,b:80}).b},0.14)`;
+      const sc=hl.dim?'rgba(255,200,80,0.6)':hl.isStroke?'rgba(100,220,100,0.7)':`rgba(${(hl.color||{r:255,g:80,b:80}).r},${(hl.color||{r:255,g:80,b:80}).g},${(hl.color||{r:255,g:80,b:80}).b},0.85)`;
+      ctx.fillStyle=fc;ctx.fillRect(rx,ry,rw,rh);
+      ctx.strokeStyle=sc;ctx.lineWidth=hl.dim?1:2;ctx.setLineDash(hl.dim?[5,3]:[]);ctx.strokeRect(rx,ry,rw,rh);ctx.setLineDash([]);
+      ctx.fillStyle=sc;ctx.font='bold 10px monospace';const ly=ry+rh+13;ctx.fillText(`${n(r.w)} × ${n(r.h)} pt`,rx,ly>canvas.height-4?ry-4:ly);
+    }
+  } else if(hl.type==='image'){
+    const m=hl.m;const corners=[[0,0],[1,0],[1,1],[0,1]].map(([x,y])=>toC(m.a*x+m.c*y+m.e,m.b*x+m.d*y+m.f));
+    ctx.beginPath();ctx.moveTo(corners[0].x,corners[0].y);corners.slice(1).forEach(c=>ctx.lineTo(c.x,c.y));ctx.closePath();
+    ctx.fillStyle='rgba(80,220,120,0.1)';ctx.fill();ctx.strokeStyle='rgba(80,220,120,0.7)';ctx.lineWidth=2;ctx.setLineDash([5,3]);ctx.stroke();ctx.setLineDash([]);
+  }
+  ctx.restore();
+}
+ 
+/* ══════════════════════════════════════
+   GRID OVERLAY
+   ══════════════════════════════════════ */
+let showGrid=false;
+function drawGrid(canvas,viewport){
+  const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(!showGrid||!viewport)return;
+  const [va,vb,vc,vd,ve,vf]=viewport.transform;
+  const scale=Math.abs(va);
+  const ph=viewport.height/scale;
+  const pw=viewport.width/scale;
+ 
+  ctx.strokeStyle='rgba(255,255,255,0.04)';ctx.lineWidth=0.5;
+  for(let x=0;x<=pw;x+=50){const cx=x*scale+ve;ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,canvas.height);ctx.stroke();}
+  for(let y=0;y<=ph;y+=50){const cy=canvas.height-y*scale;ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(canvas.width,cy);ctx.stroke();}
+  ctx.strokeStyle='rgba(255,255,255,0.08)';ctx.lineWidth=0.8;
+  for(let x=0;x<=pw;x+=100){const cx=x*scale+ve;ctx.beginPath();ctx.moveTo(cx,0);ctx.lineTo(cx,canvas.height);ctx.stroke();}
+  for(let y=0;y<=ph;y+=100){const cy=canvas.height-y*scale;ctx.beginPath();ctx.moveTo(0,cy);ctx.lineTo(canvas.width,cy);ctx.stroke();}
+  ctx.fillStyle='rgba(255,255,255,0.2)';ctx.font='9px monospace';
+  for(let x=100;x<pw;x+=100)ctx.fillText(`${x}`,x*scale+ve+2,canvas.height-4);
+  for(let y=100;y<ph;y+=100)ctx.fillText(`${y}`,2,canvas.height-y*scale-2);
+  ctx.fillStyle='rgba(255,100,100,0.5)';ctx.font='bold 9px monospace';ctx.fillText('y=0 (bottom)',4,canvas.height-4);
+  ctx.fillText('y='+Math.round(ph)+'pt (top)',4,10);
+}
+ 
+/* ══════════════════════════════════════
+   COORDINATE HUD
+   ══════════════════════════════════════ */
+function canvasToUserSpace(cx,cy,viewport){
+  const [va,vb,vc,vd,ve,vf]=viewport.transform;
+  const det=va*vd-vb*vc;
+  return{px:(vd*(cx-ve)-vc*(cy-vf))/det,py:(-vb*(cx-ve)+va*(cy-vf))/det};
+}
+ 
+/* ══════════════════════════════════════
+   CLICK → JUMP
+   ══════════════════════════════════════ */
+function findOpsNear(px,py,tolerance=22){
+  const results=[];
+  for(let i=0;i<AppState.processedOps.length;i++){
+    const hl=AppState.processedOps[i].highlight;
+    if(!hl)continue;
+    let dist=Infinity;
+    if(hl.type==='text'){
+      const l=hl.tx-5,r=hl.tx+hl.w+5,b=hl.ty-hl.h*1.25,t=hl.ty+5;
+      const dx=Math.max(0,l-px,px-r),dy=Math.max(0,b-py,py-t);
+      dist=Math.sqrt(dx*dx+dy*dy);
+    } else if(hl.type==='cursor'){
+      dist=Math.hypot(px-hl.tx,py-hl.ty);
+      if(hl.faint)dist+=14;
+    } else if(hl.type==='rects'){
+      for(const r of hl.rects){
+        const cx=r.x+r.w/2,cy=r.y+r.h/2;
+        const hw=Math.abs(r.w)/2+5,hh=Math.abs(r.h)/2+5;
+        const dx=Math.max(0,Math.abs(px-cx)-hw),dy=Math.max(0,Math.abs(py-cy)-hh);
+        dist=Math.min(dist,Math.sqrt(dx*dx+dy*dy));
+      }
+    }
+    if(dist<=tolerance) results.push({idx:i,dist,op:AppState.processedOps[i]});
+  }
+  return results.sort((a,b)=>a.dist-b.dist).slice(0,7);
+}
+ 
+function selectOp(idx){
+  const op=AppState.processedOps[idx];
+  if(!op)return;
+  activateOp(op);
+  drawHighlight(op.highlight,AppState.hlCanvas,AppState.pageViewport);
+  flashRawLine(idx);
+  flashStructOp(idx);
+}
+ 
+function showOpPicker(candidates,clientX,clientY){
+  document.querySelector('.op-picker')?.remove();
+  const wrapper=document.getElementById('canvas-wrapper');
+  if(!wrapper)return;
+  const wRect=wrapper.getBoundingClientRect();
+  const picker=document.createElement('div');
+  picker.className='op-picker';
+  const hdr=document.createElement('div');hdr.className='op-picker-hdr';
+  hdr.textContent=`${candidates.length} overlapping operators — click one:`;
+  picker.appendChild(hdr);
+  for(const c of candidates){
+    const op=c.op;
+    const item=document.createElement('div');item.className='op-picker-item';
+    const badge=BADGE_CFG[op.type]||BADGE_CFG.state;
+    const bdg=document.createElement('span');bdg.className='badge '+badge.cls;bdg.style.cssText='font-size:9px;padding:1px 4px;min-width:32px;text-align:center';bdg.textContent=badge.label;
+    const name=document.createElement('span');name.className='op-picker-name';
+    name.textContent=op.pdf+(op.args?' '+op.args.slice(0,28):'')+(op.decodedText?' "'+op.decodedText+'"':'');
+    const dist=document.createElement('span');dist.className='op-picker-dist';dist.textContent=n(c.dist)+'pt';
+    item.append(bdg,name,dist);
+    item.addEventListener('mouseenter',()=>{activateOp(op);drawHighlight(op.highlight,AppState.hlCanvas,AppState.pageViewport);});
+    item.addEventListener('click',e=>{e.stopPropagation();picker.remove();selectOp(c.idx);});
+    picker.appendChild(item);
+  }
+  let left=clientX-wRect.left+12,top=clientY-wRect.top+12;
+  wrapper.appendChild(picker);
+  const pw=picker.offsetWidth||240,ph=picker.offsetHeight||160;
+  if(left+pw>wrapper.offsetWidth-8)left=clientX-wRect.left-pw-12;
+  if(top+ph>wrapper.offsetHeight-8)top=clientY-wRect.top-ph-12;
+  picker.style.left=Math.max(4,left)+'px';
+  picker.style.top=Math.max(4,top)+'px';
+  setTimeout(()=>document.addEventListener('click',()=>picker.remove(),{once:true}),0);
+}
+ 
+function handleCanvasClick(cx,cy,clientX,clientY){
+  if(!AppState.pageViewport)return;
+  const wrapper=document.getElementById('canvas-wrapper');
+  if(wrapper){const rip=document.createElement('div');rip.className='click-ripple';const wr=wrapper.getBoundingClientRect();rip.style.left=(clientX-wr.left)+'px';rip.style.top=(clientY-wr.top)+'px';wrapper.appendChild(rip);setTimeout(()=>rip.remove(),500);}
+  const{px,py}=canvasToUserSpace(cx,cy,AppState.pageViewport);
+  const candidates=findOpsNear(px,py);
+  if(!candidates.length){
+    document.getElementById('info-text').textContent=`Nothing found near (${n(px)}, ${n(py)}) pt — try clicking directly on text or a visible shape.`;
+    document.getElementById('info-text').classList.remove('placeholder');
+    drawHighlight(null,AppState.hlCanvas,AppState.pageViewport);
+    drawTypeHighlights();
+    return;
+  }
+  if(candidates.length===1||candidates[0].dist<3){selectOp(candidates[0].idx);return;}
+  showOpPicker(candidates,clientX,clientY);
+}
+ 
+/* ══════════════════════════════════════
+   ROW MANAGEMENT & SCROLL
+   ══════════════════════════════════════ */
+const opRows=new Map();
+function scrollToOp(idx){
+  const entry=opRows.get(idx);if(!entry)return;const{row}=entry;
+  let el=row.parentElement;
+  while(el&&el.id!=='ops-list'){if(el.classList.contains('grp-items')&&el.classList.contains('collapsed')){el.classList.remove('collapsed');const hdr=el.previousElementSibling;if(hdr){const arr=hdr.querySelector('.arrow');if(arr)arr.classList.add('open');}}el=el.parentElement;}
+  row.scrollIntoView({behavior:'smooth',block:'center'});
+  document.querySelectorAll('.op-row.lit').forEach(r=>r.classList.remove('lit'));
+  row.classList.remove('flash');void row.offsetWidth;row.classList.add('lit','flash');
+  activateOp(AppState.processedOps[idx]);
+  if(AppState.hlCanvas&&AppState.pageViewport)drawHighlight(AppState.processedOps[idx].highlight,AppState.hlCanvas,AppState.pageViewport);
+}
+ 
+function activateOp(op){
+  const opLabel=`${op.name}  (${op.pdf})${op.args?' '+op.args:''}${op.decodedText?' → "'+op.decodedText+'"':''}`;
+  document.getElementById('info-op').textContent=`${op.name}  (${op.pdf})  ${op.args}`;
+  document.getElementById('info-decoded').textContent=op.decodedText?`→ "${op.decodedText}"`:' ';
+  document.getElementById('info-handle-op').textContent=opLabel;
+ 
+  const hint=op.visualHint||op.decorHint;
+  const infoText=document.getElementById('info-text');
+  infoText.classList.remove('placeholder');
+ 
+  if(hint){
+    const roleParts={
+      re:'② Path definition',rg:'① Color setup',g:'① Color setup',k:'① Color setup',
+      'f':'③ Paint command','f*':'③ Paint command','B':'③ Paint command','B*':'③ Paint command',
+    };
+    const role=roleParts[op.pdf]||'Part';
+    const isDrawnLine=hint.kind==='drawn line';
+    const isMidText=hint.kind==='mid-text line';
+    const rMid=n(hint.rectMidY);
+    const rY=n(hint.rect.y);
+    const rH=n(hint.thickness);
+ 
+    let coordSection;
+    if(isDrawnLine){
+      const textRef=hint.nearbyTextY!==null
+        ?`Y = ${n(hint.nearbyTextY)} pt${hint.nearbyText?' ("'+hint.nearbyText+'")':`  (last text drawn)`}`
+        :`none drawn yet on this page`;
+      const distStr=isFinite(hint.distFromText)?`${n(hint.distFromText)} pt`:'∞';
+      const threshStr=`${n(hint.proximityThreshold)} pt  (2.5 × font size ${n(hint.fontSize)} pt)`;
+      coordSection=
+        `Coordinate analysis:\n`+
+        `  This rectangle:      y = ${rY},  h = ${rH} pt\n`+
+        `  Rectangle midpoint Y: ${rMid} pt  (y + h÷2)\n`+
+        `  Nearest text baseline: ${textRef}\n`+
+        `  Distance to text:     ${distStr}  >  threshold ${threshStr}\n`+
+        `\n`+
+        `  Distance exceeds proximity threshold\n`+
+        `  → classified as Drawn line (geometric) ✓\n`+
+        `\n`+
+        `  Likely use: form field baseline, table border, or decorative rule.`;
+    } else {
+      const textRef=hint.nearbyText?`"${hint.nearbyText}"`:`(glyph data, not decoded)`;
+      const aboveStr=n(hint.aboveBaseline);
+      const strikeStr=`${n(hint.strikeThreshold)} pt  (20% × font size ${n(hint.fontSize)} pt)`;
+      const aboveCutoff=isMidText?`${aboveStr} pt > ${n(hint.strikeThreshold)} pt`:`${aboveStr} pt ≤ ${n(hint.strikeThreshold)} pt`;
+      const verdict=isMidText
+        ?`${aboveCutoff}  →  Mid-text line ✓  (visually: strikethrough)\n  (≤ ${n(hint.strikeThreshold)} pt above baseline → Baseline line)`
+        :`${aboveCutoff}  →  Baseline line ✓  (visually: underline)\n  (> ${n(hint.strikeThreshold)} pt above baseline → Mid-text line)`;
+      coordSection=
+        `Coordinate analysis — the ONLY way to identify this:\n`+
+        `  PDFs have no strikethrough or underline flag, attribute, or tag.\n`+
+        `  The format is semantically blind — it just draws a thin rectangle.\n`+
+        `  The only signal is where it sits relative to the nearest text.\n`+
+        `\n`+
+        `  Closest text drawn: ${textRef}\n`+
+        `  Text baseline Y:    ${n(hint.nearbyTextY)} pt\n`+
+        `  Font size:          ${n(hint.fontSize)} pt\n`+
+        `\n`+
+        `  This rectangle:         y = ${rY},  h = ${rH} pt\n`+
+        `  Rectangle midpoint Y:   ${rMid} pt  (y + h÷2)\n`+
+        `  Distance above baseline: ${aboveStr} pt  (${rMid} − ${n(hint.nearbyTextY)})\n`+
+        `  Mid-text cutoff:         > ${strikeStr}\n`+
+        `\n`+
+        `  ${verdict}`;
+    }
+ 
+    const intro=isDrawnLine
+      ?`This is a geometric line — a thin filled rectangle not anchored to any text.\n`+
+        `PDFs draw form baselines, table borders, and decorative rules using the\n`+
+        `exact same f / re operators as strikethrough. There is no distinction in\n`+
+        `the format — only coordinates tell them apart.`
+      :`PDFs have no strikethrough or underline concept — not in the content\n`+
+        `stream, not in the structure tree, not anywhere. This is just a thin\n`+
+        `filled rectangle. Whether you are a human or an LLM reading the stream,\n`+
+        `coordinates are the only way to classify what it visually represents.`;
+ 
+    infoText.textContent=
+      `▶ ${hint.kindLabel}  (${role} of a 3-step sequence)\n`+
+      `──────────────────────────────────\n`+
+      intro+`\n\n`+
+      coordSection+`\n\n`+
+      `─── How it is drawn (3-step sequence) ───\n`+
+      hint.seqStr+`\n\n`+
+      `─── Operator detail ───\n`+
+      op.explain;
+  } else {
+    infoText.textContent=op.explain;
+  }
+}
+ 
+/* ══════════════════════════════════════
+   BUILD OPERATOR LIST
+   ══════════════════════════════════════ */
+function buildOpsList(){
+  const list=document.getElementById('ops-list');list.innerHTML='';opRows.clear();
+  if(!AppState.processedOps.length){list.innerHTML='<div style="padding:20px;color:#555">No operators found.</div>';return;}
+  const topGroup={label:'(page stream)',items:[],children:[]};
+  const stack=[topGroup];let gid=0;
+  for(const op of AppState.processedOps){
+    const cur=stack[stack.length-1];
+    if(op.pdf==='BDC'||op.pdf==='BMC'){gid++;const mm=op.args.match(/MCID\s+(\d+)/),tm=op.args.match(/^\/(\w+)/);const group={label:(mm?'MCID '+mm[1]:''+(tm?' /'+tm[1]:op.args)),items:[op],children:[],opIdx:op.idx};cur.children.push(group);stack.push(group);}
+    else if(op.pdf==='EMC'){cur.items.push(op);if(stack.length>1)stack.pop();}
+    else cur.items.push(op);
+  }
+  function renderGroup(group,container,depth){
+    const itemsDiv=document.createElement('div');itemsDiv.className='grp-items';
+    if(depth>0){
+      const textInGroup=group.items.filter(o=>o.decodedText).map(o=>o.decodedText).join('');
+      const hasFill=group.items.some(o=>['f','f*','S','B','B*'].includes(o.pdf));
+      const hdr=document.createElement('div');hdr.className='grp-header'+(hasFill?' hasfill':'');
+      const arr=document.createElement('span');arr.className='arrow open';arr.textContent='▶';
+      const lbl=document.createElement('span');lbl.textContent=group.label;hdr.append(arr,lbl);
+      if(textInGroup.trim()){const prev=document.createElement('span');prev.className='grp-text-prev';prev.textContent='"'+textInGroup.trim().substring(0,28)+(textInGroup.length>28?'…':'')+'"';hdr.appendChild(prev);}
+      const cnt=document.createElement('span');cnt.className='grp-count';cnt.textContent=group.items.length+' ops';hdr.appendChild(cnt);
+      let expanded=true;hdr.addEventListener('click',()=>{expanded=!expanded;itemsDiv.classList.toggle('collapsed',!expanded);arr.classList.toggle('open',expanded);});
+      container.appendChild(hdr);
+    }
+    const childByIdx=new Map();for(const child of group.children)childByIdx.set(child.opIdx,child);
+    for(const op of group.items){
+      if((op.pdf==='BDC'||op.pdf==='BMC')&&childByIdx.has(op.idx)){renderGroup(childByIdx.get(op.idx),itemsDiv,depth+1);continue;}
+      const row=makeRow(op);itemsDiv.appendChild(row);opRows.set(op.idx,{row});
+    }
+    container.appendChild(itemsDiv);
+  }
+  renderGroup(topGroup,list,0);
+}
+ 
+function makeRow(op){
+  const row=document.createElement('div');row.className='op-row';row.dataset.search=op.searchText;
+  const badge=BADGE_CFG[op.type]||BADGE_CFG.state;
+  const bdg=document.createElement('span');bdg.className='badge '+badge.cls;bdg.textContent=badge.label;
+  const code=document.createElement('code');code.className='op-code';
+  if(op.decodedText)code.innerHTML=esc(op.pdf)+' <span class="decoded-str">"'+esc(op.decodedText)+'"</span>';
+  else code.textContent=op.pdf+(op.args?' '+op.args:'');
+  row.append(bdg,code);
+  row.addEventListener('mouseenter',()=>{document.querySelectorAll('.op-row.lit').forEach(r=>r.classList.remove('lit'));row.classList.add('lit');activateOp(op);if(AppState.hlCanvas&&AppState.pageViewport)drawHighlight(op.highlight,AppState.hlCanvas,AppState.pageViewport);});
+  return row;
+}
+ 
+/* ══════════════════════════════════════
+   SEARCH
+   ══════════════════════════════════════ */
+function applySearch(q){
+  q=q.trim().toLowerCase();
+  const allRows=document.querySelectorAll('#ops-list .op-row'),allItems=document.querySelectorAll('#ops-list .grp-items'),cnt=document.getElementById('search-count');
+  document.getElementById('clear-btn').style.display=q?'block':'none';
+  if(!q){allRows.forEach(r=>r.classList.remove('search-hidden'));cnt.textContent='';return;}
+  allItems.forEach(g=>g.classList.remove('collapsed'));document.querySelectorAll('.arrow').forEach(a=>a.classList.add('open'));
+  let matches=0;allRows.forEach(r=>{const hit=(r.dataset.search||'').includes(q);r.classList.toggle('search-hidden',!hit);if(hit)matches++;});
+  cnt.textContent=matches+' match'+(matches!==1?'es':'');
+}
+ 
+/* ══════════════════════════════════════
+   TABS
+   ══════════════════════════════════════ */
+const tabPanels={struct:'struct-tab',ops:'ops-tab-panel',info:'info-tab',raw:'raw-tab'};
+function switchTab(name){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  Object.entries(tabPanels).forEach(([k,id])=>document.getElementById(id).classList.toggle('active',k===name));
+}
+document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
+ 
+/* ══════════════════════════════════════
+   CROSS-PAGE NAVIGATION
+   ══════════════════════════════════════ */
+async function preprocessAllPages(){
+  if(!AppState.pdfDoc||AppState.isPreprocessing)return;
+  AppState.isPreprocessing=true;
+  try{
+    for(let p=1;p<=AppState.pageCount;p++){
+      if(AppState.allPageOps[p])continue;
+      const page=await AppState.pdfDoc.getPage(p);
+      const [opList,tc]=await Promise.all([
+        page.getOperatorList(),
+        page.getTextContent().catch(()=>({items:[]}))
+      ]);
+      AppState.allPageOps[p]=processOps(opList.fnArray,opList.argsArray,tc.items,p);
+      renderStructTree(buildStructTree(AppState.allPageOps[AppState.currentPage]),AppState.currentPage);
+    }
+  }finally{AppState.isPreprocessing=false;}
+}
+ 
+async function navigateToAndHighlight(targetPage,opIdx){
+  if(targetPage===AppState.currentPage){
+    const op=AppState.processedOps[opIdx];
+    if(op){activateOp(op);drawHighlight(op.highlight,AppState.hlCanvas,AppState.pageViewport);flashRawLine(opIdx);flashStructOp(opIdx);scrollCanvasToHighlight(op.highlight,AppState.pageViewport);}
+    return;
+  }
+  AppState.pendingHighlight={page:targetPage,idx:opIdx};
+  AppState.currentPage=targetPage;
+  await renderPage(targetPage);
+}
+ 
+function scrollCanvasToHighlight(hl,viewport){
+  if(!hl||!viewport)return;
+  const area=document.getElementById('canvas-area');
+  if(!area)return;
+  const [va,vb,vc,vd,ve,vf]=viewport.transform;
+  let screenY=null;
+  if(hl.type==='text')screenY=vb*hl.tx+vd*hl.ty+vf;
+  else if(hl.type==='cursor')screenY=vb*hl.tx+vd*hl.ty+vf;
+  else if(hl.type==='rects'&&hl.rects.length){const r=hl.rects[0];screenY=vb*r.x+vd*(r.y+r.h/2)+vf;}
+  if(screenY===null)return;
+  setTimeout(()=>{
+    const wrapper=document.getElementById('canvas-wrapper');
+    if(!wrapper)return;
+    const wrapperTop=wrapper.offsetTop||18;
+    const target=wrapperTop+screenY-area.clientHeight/2;
+    area.scrollTo({top:Math.max(0,target),behavior:'smooth'});
+  },80);
+}
+ 
+/* ══════════════════════════════════════
+   PAGE RENDERING
+   ══════════════════════════════════════ */
+async function renderPage(num){
+  document.getElementById('loader').style.display='block';
+  try{
+    const page=await AppState.pdfDoc.getPage(num);
+    const vp=page.getViewport({scale:AppState.renderScale});AppState.pageViewport=vp;
+    const area=document.getElementById('canvas-area');
+    area.innerHTML=`<div id="canvas-wrapper"><canvas id="pdf-canvas"></canvas><canvas id="grid-canvas"></canvas><canvas id="hl-canvas"></canvas><canvas id="click-canvas"></canvas></div>`;
+    const pdfCanvas=document.getElementById('pdf-canvas');
+    AppState.hlCanvas=document.getElementById('hl-canvas');
+    AppState.gridCanvas=document.getElementById('grid-canvas');
+    const cc=document.getElementById('click-canvas');
+    const w=Math.round(vp.width),h=Math.round(vp.height);
+    pdfCanvas.width=AppState.hlCanvas.width=AppState.gridCanvas.width=cc.width=w;
+    pdfCanvas.height=AppState.hlCanvas.height=AppState.gridCanvas.height=cc.height=h;
+ 
+    const renderParams={canvasContext:pdfCanvas.getContext('2d'),viewport:vp};
+    if(AppState.optContentConfig)renderParams.optionalContentConfigPromise=Promise.resolve(AppState.optContentConfig);
+    await page.render(renderParams).promise;
+    drawGrid(AppState.gridCanvas,vp);
+ 
+    const [opList,textContent,metadata]=await Promise.all([
+      page.getOperatorList(),
+      page.getTextContent().catch(()=>({items:[]})),
+      AppState.pdfDoc.getMetadata().catch(()=>({info:{}})),
+    ]);
+ 
+    AppState.processedOps=processOps(opList.fnArray,opList.argsArray,textContent.items,num);
+    AppState.allPageOps[num]=AppState.processedOps;
+    buildOpsList();
+    renderStructTree(buildStructTree(AppState.processedOps),num);
+    await buildInfoPanel(page,metadata,AppState.processedOps);
+ 
+    const rawLines=reconstructRaw(AppState.processedOps);
+    document.getElementById('raw-content').innerHTML=buildRawHTML(rawLines,AppState.processedOps);
+ 
+    const pw1=vp.width/AppState.renderScale,ph1=vp.height/AppState.renderScale;
+    document.getElementById('page-dims').textContent=`Page: ${n(pw1)} × ${n(ph1)} pt (y=0 bottom, y=${n(ph1)} top)`;
+ 
+    cc.addEventListener('mousemove',e=>{
+      if(!AppState.pageViewport)return;
+      const rect=cc.getBoundingClientRect();
+      const sx=cc.width/rect.width,sy=cc.height/rect.height;
+      const cx=(e.clientX-rect.left)*sx,cy=(e.clientY-rect.top)*sy;
+      const{px,py}=canvasToUserSpace(cx,cy,AppState.pageViewport);
+      document.getElementById('coord-xy').innerHTML=`PDF coords: <span>x = ${n(px)} pt</span>  <span>y = ${n(py)} pt</span>  <span style="color:#555">(y=0 is bottom)</span>`;
+    });
+    cc.addEventListener('mouseleave',()=>{document.getElementById('coord-xy').textContent='Move mouse over PDF for coordinates';});
+ 
+    cc.addEventListener('mousedown',e=>{
+      if(e.button!==0)return;
+      const area=document.getElementById('canvas-area');
+      const panStart={startX:e.clientX,startY:e.clientY,scrollLeft:area.scrollLeft,scrollTop:area.scrollTop,moved:false};
+      cc.classList.add('grabbing');
+      e.preventDefault();
+      function onMove(ev){
+        const dx=ev.clientX-panStart.startX,dy=ev.clientY-panStart.startY;
+        if(!panStart.moved&&Math.hypot(dx,dy)>5)panStart.moved=true;
+        if(panStart.moved){area.scrollLeft=panStart.scrollLeft-dx;area.scrollTop=panStart.scrollTop-dy;}
+      }
+      function onUp(ev){
+        document.removeEventListener('mousemove',onMove);
+        document.removeEventListener('mouseup',onUp);
+        cc.classList.remove('grabbing');
+        if(!panStart.moved){
+          const rect=cc.getBoundingClientRect();
+          const sx=cc.width/rect.width,sy=cc.height/rect.height;
+          const cx=(panStart.startX-rect.left)*sx,cy=(panStart.startY-rect.top)*sy;
+          handleCanvasClick(cx,cy,panStart.startX,panStart.startY);
+        }
+      }
+      document.addEventListener('mousemove',onMove);
+      document.addEventListener('mouseup',onUp);
+    });
+ 
+    document.getElementById('page-info').textContent=`${num}/${AppState.pageCount}`;
+    document.getElementById('prev-pg').disabled=num<=1;document.getElementById('next-pg').disabled=num>=AppState.pageCount;
+ 
+    if(AppState._pendingZoomFocus){
+      const {fracX,fracY,mouseX,mouseY}=AppState._pendingZoomFocus;AppState._pendingZoomFocus=null;
+      const area=document.getElementById('canvas-area');
+      const wrapper=document.getElementById('canvas-wrapper');
+      if(area&&wrapper){
+        const PAD=18;
+        area.scrollLeft=fracX*wrapper.offsetWidth+PAD-mouseX;
+        area.scrollTop =fracY*wrapper.offsetHeight+PAD-mouseY;
+      }
+    }
+ 
+    if(AppState.pendingHighlight&&AppState.pendingHighlight.page===num){
+      const tOp=AppState.processedOps[AppState.pendingHighlight.idx];
+      if(tOp){
+        activateOp(tOp);
+        drawHighlight(tOp.highlight,AppState.hlCanvas,AppState.pageViewport);
+        flashRawLine(AppState.pendingHighlight.idx);
+        flashStructOp(AppState.pendingHighlight.idx);
+        scrollCanvasToHighlight(tOp.highlight,AppState.pageViewport);
+        const cw=document.getElementById('canvas-wrapper');
+        if(cw){void cw.offsetWidth;cw.classList.add('page-turn-in');setTimeout(()=>cw.classList.remove('page-turn-in'),400);}
+      }
+      AppState.pendingHighlight=null;
+    }
+ 
+    if(AppState.pageCount>1) setTimeout(preprocessAllPages,300);
+    drawTypeHighlights();
+ 
+  }finally{document.getElementById('loader').style.display='none';}
+}
+ 
+/* ══════════════════════════════════════
+   OPTIONAL CONTENT (LAYERS)
+   ══════════════════════════════════════ */
+function buildLayersPanel(){
+  const bar=document.getElementById('layers-bar');
+  const list=document.getElementById('layers-list');
+  list.innerHTML='';
+  if(!AppState.optContentConfig){bar.classList.remove('visible');return;}
+  const groups=AppState.optContentConfig.getGroups?.();
+  if(!groups||groups.size===0){bar.classList.remove('visible');return;}
+  bar.classList.add('visible');
+  for(const[id,group]of groups){
+    const chip=document.createElement('label');
+    chip.className='layer-chip'+(group.visible?' layer-on':'');
+    chip.dataset.layerId=id;
+    const cb=document.createElement('input');
+    cb.type='checkbox';cb.checked=!!group.visible;
+    cb.addEventListener('change',e=>{
+      e.stopPropagation();
+      AppState.optContentConfig.setVisibility(id,cb.checked);
+      chip.classList.toggle('layer-on',cb.checked);
+      rerenderPDFCanvas();
+    });
+    const lbl=document.createElement('span');
+    lbl.className='layer-chip-lbl';
+    lbl.textContent=group.name||id;
+    chip.append(cb,lbl);
+    list.appendChild(chip);
+  }
+}
+ 
+async function rerenderPDFCanvas(){
+  if(!AppState.pdfDoc||!AppState.pageViewport)return;
+  document.getElementById('loader').style.display='block';
+  try{
+    const page=await AppState.pdfDoc.getPage(AppState.currentPage);
+    const pdfCanvas=document.getElementById('pdf-canvas');
+    if(!pdfCanvas)return;
+    const ctx=pdfCanvas.getContext('2d');
+    ctx.clearRect(0,0,pdfCanvas.width,pdfCanvas.height);
+    const rp={canvasContext:ctx,viewport:AppState.pageViewport};
+    if(AppState.optContentConfig)rp.optionalContentConfigPromise=Promise.resolve(AppState.optContentConfig);
+    await page.render(rp).promise;
+  }catch(e){console.warn('Layer re-render:',e);}
+  finally{document.getElementById('loader').style.display='none';}
+}
+ 
+document.getElementById('layers-eye-all').addEventListener('click',()=>{
+  if(!AppState.optContentConfig)return;
+  const chips=[...document.querySelectorAll('.layer-chip')];
+  if(!chips.length)return;
+  const anyOn=chips.some(c=>c.querySelector('input').checked);
+  const groups=AppState.optContentConfig.getGroups?.();
+  if(!groups)return;
+  for(const[id]of groups)AppState.optContentConfig.setVisibility(id,!anyOn);
+  chips.forEach(c=>{const cb=c.querySelector('input');cb.checked=!anyOn;c.classList.toggle('layer-on',!anyOn);});
+  rerenderPDFCanvas();
+});
+ 
+/* ══════════════════════════════════════
+   OPERATOR-TYPE LAYER TOGGLES
+   ══════════════════════════════════════ */
+const hiddenOpTypes = new Set();
+ 
+const OP_TYPE_TINT = {
+  mark:  {r:140,g:120,b:220},
+  text:  {r: 60,g:140,b:220},
+  state: {r:220,g:160,b: 50},
+  path:  {r:220,g:100,b: 60},
+  clip:  {r:120,g:180,b: 70},
+  image: {r: 60,g:180,b:120},
+};
+ 
+function drawTypeHighlights(){
+  const canvas=AppState.hlCanvas,viewport=AppState.pageViewport;
+  if(!canvas||!viewport)return;
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(hiddenOpTypes.size===0)return;
+  const [va,vb,vc,vd,ve,vf]=viewport.transform;
+  const scale=Math.abs(va);
+  const toC=(px,py)=>({x:va*px+vc*py+ve,y:vb*px+vd*py+vf});
+  // Group ops by type first, then composite each type as a single unit so
+  // overlapping rects within a type don't stack their alpha to solid color.
+  const byType={};
+  for(const op of AppState.processedOps){
+    if(hiddenOpTypes.has(op.type))continue;
+    const tint=OP_TYPE_TINT[op.type];
+    if(!tint||!op.highlight)continue;
+    if(!byType[op.type])byType[op.type]=[];
+    byType[op.type].push(op);
+  }
+  for(const [type,ops] of Object.entries(byType)){
+    const tint=OP_TYPE_TINT[type];
+    const tmp=document.createElement('canvas');
+    tmp.width=canvas.width;tmp.height=canvas.height;
+    const tc=tmp.getContext('2d');
+    tc.fillStyle=`rgb(${tint.r},${tint.g},${tint.b})`;
+    tc.strokeStyle=`rgba(${tint.r},${tint.g},${tint.b},0.7)`;
+    tc.lineWidth=1;
+    for(const op of ops){
+      const hl=op.highlight;
+      if(hl.type==='rects'){
+        for(const r of hl.rects){
+          const p1=toC(r.x,r.y),p2=toC(r.x+r.w,r.y+r.h);
+          const rx=Math.min(p1.x,p2.x),ry=Math.min(p1.y,p2.y),rw=Math.abs(p2.x-p1.x),rh=Math.abs(p2.y-p1.y);
+          tc.fillRect(rx,ry,rw,rh);tc.strokeRect(rx,ry,rw,rh);
+        }
+      } else if(hl.type==='text'){
+        const p=toC(hl.tx,hl.ty);const w=hl.w*scale,h=hl.h*scale;
+        tc.fillRect(p.x,p.y-h*0.85,w,h);tc.strokeRect(p.x,p.y-h*0.85,w,h);
+      }
+    }
+    ctx.save();
+    ctx.globalAlpha=0.15;
+    ctx.drawImage(tmp,0,0);
+    ctx.restore();
+  }
+}
+ 
+function updateOpLayerCounts(){
+  const counts={mark:0,text:0,state:0,path:0,clip:0,image:0};
+  for(const op of AppState.processedOps)if(op.type in counts)counts[op.type]++;
+  document.querySelectorAll('.op-layer-btn').forEach(btn=>{
+    const t=btn.dataset.optype;
+    const el=btn.querySelector('.op-layer-cnt');
+    if(el&&t in counts)el.textContent=counts[t]>0?counts[t]:'';
+  });
+}
+ 
+document.getElementById('op-layer-bar').addEventListener('click',e=>{
+  const btn=e.target.closest('.op-layer-btn');
+  if(!btn)return;
+  const t=btn.dataset.optype;
+  const rawContent=document.getElementById('raw-content');
+  if(hiddenOpTypes.has(t)){
+    hiddenOpTypes.delete(t);
+    rawContent.classList.remove('hide-'+t);
+    btn.classList.add('layer-on');
+  } else {
+    hiddenOpTypes.add(t);
+    rawContent.classList.add('hide-'+t);
+    btn.classList.remove('layer-on');
+  }
+  drawTypeHighlights();
+});
+ 
+async function loadPDF(buf, filename, fromCache){
+  if(!fromCache && filename) _saveToCache(buf.slice(0), filename);
+  AppState.pdfDoc=await pdfjsLib.getDocument({data:buf}).promise;
+  AppState.pageCount=AppState.pdfDoc.numPages;AppState.currentPage=1;
+  AppState.allPageOps={};AppState.pendingHighlight=null;AppState.isPreprocessing=false;
+  AppState.optContentConfig=await AppState.pdfDoc.getOptionalContentConfig().catch(()=>null);
+  buildLayersPanel();
+  document.getElementById('canvas-toolbar').style.display='flex';
+  document.getElementById('export-stream-btn').style.display='';
+  updateFileLabel(filename||null, fromCache);
+  await renderPage(1);
+  if(!localStorage.getItem('pdf-explorer-hint-shown')){
+    setTimeout(()=>{
+      showToast('Tip: Click any operator to highlight it on the PDF. Click the PDF canvas to select the nearest operator.', 6000);
+      localStorage.setItem('pdf-explorer-hint-shown','1');
+    }, 800);
+  }
+}
+ 
+/* ══════════════════════════════════════
+   EVENTS
+   ══════════════════════════════════════ */
+document.getElementById('file-input').addEventListener('change',e=>{
+  const f=e.target.files[0];
+  if(f)handleFile(f);
+});
+ 
+document.getElementById('clear-cache-btn').addEventListener('click',async()=>{
+  await _clearCache();
+  updateFileLabel(null);
+  AppState.reset();
+  hiddenOpTypes.clear();
+  document.querySelectorAll('.op-layer-btn').forEach(b=>{b.classList.add('layer-on');const cnt=b.querySelector('.op-layer-cnt');if(cnt)cnt.textContent='';});
+  document.getElementById('layers-bar').classList.remove('visible');
+  document.getElementById('layers-list').innerHTML='';
+  document.getElementById('canvas-area').innerHTML=`<div id="canvas-placeholder"><div class="placeholder-title">📄 PDF Layer Explorer</div><div class="placeholder-body">PDFs have no built-in concept of "strikethrough" or "underline" — those are <em>drawn</em> with the same rectangle operators as everything else. Meaning comes from coordinates, not semantic tags.</div><div class="placeholder-hint">Drop a PDF here or click Upload to explore its raw operator stream.</div></div>`;
+  document.getElementById('canvas-toolbar').style.display='none';
+  document.getElementById('export-stream-btn').style.display='none';
+  document.getElementById('struct-panel').innerHTML=`<div class="panel-empty"><div class="panel-empty-title">Marked Content</div><div class="panel-empty-body">If the PDF has accessibility tags (BDC/EMC operators), they appear here as a tree — paragraphs, figures, spans — linked back to the raw stream.</div></div>`;
+  document.getElementById('raw-content').innerHTML=`<div class="panel-empty"><div class="panel-empty-title">Content Stream</div><div class="panel-empty-body">Every PDF page is a sequence of drawing commands — <code>re</code> defines a rectangle, <code>rg</code> sets its color, <code>f</code> fills it. Upload a PDF to explore this stream.</div></div>`;
+  document.getElementById('info-meta').innerHTML='<div class="struct-empty">Upload a PDF to see its properties</div>';
+  document.getElementById('coord-xy').textContent='Move mouse over PDF for coordinates';
+  document.getElementById('page-dims').textContent='';
+  document.getElementById('info-text').textContent='Hover any operator to see its explanation · Click the PDF or a raw line to highlight';
+  document.getElementById('info-text').classList.add('placeholder');
+});
+ 
+document.getElementById('export-stream-btn').addEventListener('click',()=>{
+  const lines=[...document.querySelectorAll('.raw-line')].map(el=>el.dataset.copy||el.textContent.replace('⎘','').trim());
+  if(!lines.length){showToast('No stream to export');return;}
+  const fname=(document.getElementById('file-label').textContent||'stream').replace(/\.pdf$/i,'')||'stream';
+  const blob=new Blob([`# PDF Operator Stream — ${fname}, Page ${AppState.currentPage}\n\n`+lines.join('\n')],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`${fname}-page${AppState.currentPage}.txt`;a.click();URL.revokeObjectURL(a.href);
+  showToast('Stream exported',1500);
+});
+ 
+document.getElementById('info-btn').addEventListener('click',()=>{document.getElementById('info-modal').classList.add('open');});
+document.getElementById('info-modal-close').addEventListener('click',()=>{document.getElementById('info-modal').classList.remove('open');});
+document.getElementById('info-modal').addEventListener('click',e=>{if(e.target===document.getElementById('info-modal'))document.getElementById('info-modal').classList.remove('open');});
+ 
+function _applyRawSearch(q){
+  const countEl=document.getElementById('raw-search-count');
+  const mpPanel=document.getElementById('multipage-results');
+  const allPages=document.getElementById('raw-search-all').checked;
+ 
+  // Multi-page mode
+  if(allPages&&q){
+    mpPanel.classList.add('open');
+    const byPage={};
+    let total=0;
+    for(const [pn,ops] of Object.entries(AppState.allPageOps)){
+      const hits=ops.filter(op=>op.searchText&&op.searchText.includes(q));
+      if(hits.length){byPage[pn]=hits;total+=hits.length;}
+    }
+    if(!total){mpPanel.innerHTML='<div class="mp-no-results">No matches across all pages.</div>';countEl.textContent=' no matches';return;}
+    countEl.textContent=`${total} across ${Object.keys(byPage).length} page${Object.keys(byPage).length>1?'s':''}`;
+    const frag=document.createDocumentFragment();
+    for(const pn of Object.keys(byPage).sort((a,b)=>a-b)){
+      const grp=document.createElement('div');grp.className='mp-result-group';
+      const hdr=document.createElement('div');hdr.className='mp-page-hdr';hdr.textContent=`Page ${pn}`;
+      grp.appendChild(hdr);
+      for(const op of byPage[pn].slice(0,30)){
+        const row=document.createElement('div');row.className='mp-row';
+        const opSpan=document.createElement('span');opSpan.className='mp-row-op';opSpan.textContent=op.pdf;
+        const txtSpan=document.createElement('span');txtSpan.className='mp-row-text';
+        txtSpan.textContent=op.decodedText?`"${op.decodedText}"`:op.args;
+        row.appendChild(opSpan);row.appendChild(txtSpan);
+        row.addEventListener('click',async()=>{
+          if(AppState.currentPage!==parseInt(pn)){AppState.currentPage=parseInt(pn);await renderPage(AppState.currentPage);}
+          const localIdx=AppState.processedOps.findIndex(o=>o.idx===op.idx&&o.page===op.page);
+          if(localIdx>=0)selectOp(localIdx);
+        });
+        grp.appendChild(row);
+      }
+      frag.appendChild(grp);
+    }
+    mpPanel.innerHTML='';mpPanel.appendChild(frag);
+    return;
+  }
+ 
+  // Single-page mode (existing behaviour)
+  mpPanel.classList.remove('open');
+  const lines=document.querySelectorAll('.raw-line');
+  let matches=0,firstMatch=null;
+  lines.forEach(line=>{
+    line.classList.remove('search-match','search-hidden');
+    if(!q)return;
+    const txt=(line.textContent||'').toLowerCase();
+    if(txt.includes(q)){matches++;line.classList.add('search-match');if(!firstMatch)firstMatch=line;}
+    else line.classList.add('search-hidden');
+  });
+  if(!q){countEl.textContent='';return;}
+  countEl.textContent=matches?`${matches} match${matches>1?'es':''}`:' no matches';
+  if(firstMatch) scrollRawToCenter(firstMatch);
+}
+ 
+document.getElementById('raw-search').addEventListener('input',e=>{
+  _applyRawSearch(e.target.value.trim().toLowerCase());
+});
+document.getElementById('raw-search-all').addEventListener('change',()=>{
+  _applyRawSearch(document.getElementById('raw-search').value.trim().toLowerCase());
+});
+document.getElementById('raw-search').addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.target.value='';_applyRawSearch('');}
+  if(e.key==='Enter'){
+    const matches=[...document.querySelectorAll('.raw-line.search-match')];
+    if(!matches.length)return;
+    const lit=document.querySelector('.raw-line.lit');
+    const cur=matches.indexOf(lit);
+    const next=matches[(cur+1)%matches.length];
+    const nIdx=parseInt(next.dataset.idx);
+    flashRawLine(nIdx);
+    flashStructOp(nIdx);
+    const op=AppState.processedOps[nIdx];
+    if(op&&AppState.hlCanvas&&AppState.pageViewport){activateOp(op);drawHighlight(op.highlight,AppState.hlCanvas,AppState.pageViewport);}
+  }
+});
+ 
+document.getElementById('struct-search').addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll('#struct-panel .tree-node').forEach(node=>{
+    const txt=(node.textContent||'').toLowerCase();
+    node.style.display=(!q||txt.includes(q))?'':'none';
+  });
+});
+ 
+(async()=>{
+  try{
+    const cached=await _loadFromCache();
+    if(cached && cached.buf) await loadPDF(cached.buf,cached.filename,true);
+  }catch(e){console.warn('PDF restore failed:',e);await _clearCache();}
+})();
+ 
+document.getElementById('prev-pg').addEventListener('click',async()=>{if(AppState.currentPage>1){AppState.currentPage--;await renderPage(AppState.currentPage);}});
+document.getElementById('next-pg').addEventListener('click',async()=>{if(AppState.currentPage<AppState.pageCount){AppState.currentPage++;await renderPage(AppState.currentPage);}});
+ 
+let _zoomTimer = null;
+document.getElementById('scale-slider').addEventListener('input',e=>{
+  AppState.renderScale=parseFloat(e.target.value);
+  document.getElementById('scale-label').textContent=AppState.renderScale.toFixed(2)+'×';
+  clearTimeout(_zoomTimer);
+  _zoomTimer=setTimeout(()=>{if(AppState.pdfDoc)renderPage(AppState.currentPage);},150);
+});
+ 
+document.getElementById('grid-btn').addEventListener('click',()=>{showGrid=!showGrid;document.getElementById('grid-btn').classList.toggle('active',showGrid);if(AppState.gridCanvas&&AppState.pageViewport)drawGrid(AppState.gridCanvas,AppState.pageViewport);});
+ 
+document.getElementById('canvas-area').addEventListener('wheel',e=>{
+  if(!AppState.pdfDoc)return;
+  if(!e.ctrlKey&&!e.metaKey)return;
+  e.preventDefault();
+  const area=document.getElementById('canvas-area');
+  const wrapper=document.getElementById('canvas-wrapper');
+  if(!wrapper)return;
+  const aRect=area.getBoundingClientRect();
+  const mouseX=e.clientX-aRect.left;
+  const mouseY=e.clientY-aRect.top;
+  const PAD=18;
+  const fracX=wrapper.offsetWidth>0?(area.scrollLeft+mouseX-PAD)/wrapper.offsetWidth:0.5;
+  const fracY=wrapper.offsetHeight>0?(area.scrollTop+mouseY-PAD)/wrapper.offsetHeight:0.5;
+  const dir=e.deltaY<0?1:-1;
+  const newScale=Math.max(0.5,Math.min(3,Math.round((AppState.renderScale+dir*0.25)*4)/4));
+  if(newScale===AppState.renderScale)return;
+  AppState._pendingZoomFocus={fracX,fracY,mouseX,mouseY};
+  AppState.renderScale=newScale;
+  document.getElementById('scale-slider').value=AppState.renderScale;
+  document.getElementById('scale-label').textContent=AppState.renderScale.toFixed(2)+'×';
+  renderPage(AppState.currentPage);
+},{passive:false});
+ 
+(()=>{
+  const box=document.getElementById('info-box');
+  const handle=document.getElementById('info-handle');
+  const toggleBtn=document.getElementById('info-toggle-btn');
+  const MIN_H=26, MAX_H=600, DEFAULT_H=220;
+  let openHeight=DEFAULT_H, collapsed=false, drag=null;
+ 
+  function setHeight(h,animate){
+    if(animate){box.classList.add('animating');setTimeout(()=>box.classList.remove('animating'),200);}
+    box.style.height=h+'px';
+  }
+ 
+  handle.addEventListener('mousedown',e=>{
+    if(e.target===toggleBtn)return;
+    drag={startY:e.clientY,startH:box.offsetHeight};
+    document.body.style.cursor='ns-resize';
+    document.body.style.userSelect='none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!drag)return;
+    const delta=drag.startY-e.clientY;
+    const newH=Math.max(MIN_H,Math.min(MAX_H,drag.startH+delta));
+    box.style.height=newH+'px';
+    if(newH>MIN_H){
+      openHeight=newH;
+      if(collapsed){collapsed=false;box.classList.remove('collapsed');toggleBtn.textContent='▼';}
+    } else {
+      collapsed=true;box.classList.add('collapsed');toggleBtn.textContent='▲';
+    }
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!drag)return;
+    drag=null;
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
+    if(box.offsetHeight<=MIN_H+8&&!collapsed){
+      collapsed=true;box.classList.add('collapsed');toggleBtn.textContent='▲';
+      setHeight(MIN_H,true);
+    }
+  });
+ 
+  toggleBtn.addEventListener('click',e=>{
+    e.stopPropagation();
+    collapsed=!collapsed;
+    if(collapsed){
+      box.classList.add('collapsed');
+      toggleBtn.textContent='▲';
+      setHeight(MIN_H,true);
+    } else {
+      box.classList.remove('collapsed');
+      toggleBtn.textContent='▼';
+      setHeight(openHeight,true);
+    }
+  });
+ 
+  handle.addEventListener('dblclick',e=>{
+    if(e.target===toggleBtn)return;
+    toggleBtn.click();
+  });
+})();
+ 
+document.getElementById('raw-content').addEventListener('click',e=>{
+  if(e.target.classList.contains('op-copy-btn')){
+    e.stopPropagation();
+    const line=e.target.closest('.raw-line');
+    if(line&&line.dataset.copy){
+      navigator.clipboard.writeText(line.dataset.copy).then(()=>showToast('Copied!',1200)).catch(()=>showToast('Copy failed',1200));
+    }
+    return;
+  }
+  const line=e.target.closest('.raw-line');
+  if(!line||!AppState.hlCanvas||!AppState.pageViewport)return;
+  const idx=parseInt(line.dataset.idx);
+  const op=AppState.processedOps[idx];
+  if(!op)return;
+  flashRawLine(idx);
+  activateOp(op);
+  drawHighlight(op.highlight,AppState.hlCanvas,AppState.pageViewport);
+  flashStructOp(idx);
+});
+ 
+/* ── Drag-and-drop PDF ── */
+async function handleFile(file){
+  try{
+    const buf=await file.arrayBuffer();
+    await loadPDF(buf,file.name,false);
+  }catch(err){
+    console.error('PDF load error:',err);
+    document.getElementById('info-text').textContent='Error loading PDF: '+err.message;
+    document.getElementById('info-text').classList.remove('placeholder');
+    document.getElementById('loader').style.display='none';
+  }
+}
+document.body.addEventListener('dragover',e=>{
+  if([...e.dataTransfer.types].includes('Files')){e.preventDefault();document.getElementById('canvas-area').classList.add('drag-over');}
+});
+document.body.addEventListener('dragleave',e=>{
+  if(!e.relatedTarget||!document.body.contains(e.relatedTarget))document.getElementById('canvas-area').classList.remove('drag-over');
+});
+document.body.addEventListener('drop',e=>{
+  e.preventDefault();
+  document.getElementById('canvas-area').classList.remove('drag-over');
+  const f=[...e.dataTransfer.files].find(f=>f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf'));
+  if(f)handleFile(f);
+});
+ 
+/* ── Keyboard navigation ── */
+(()=>{
+  const keysModal=document.getElementById('keys-modal');
+  document.getElementById('keys-modal-close').addEventListener('click',()=>keysModal.classList.remove('open'));
+  keysModal.addEventListener('click',e=>{if(e.target===keysModal)keysModal.classList.remove('open');});
+ 
+  let _kbdIdx=-1;
+ 
+  function _visibleOpIndices(){
+    return [...document.querySelectorAll('.raw-line:not(.search-hidden)')]
+      .map(el=>parseInt(el.dataset.idx))
+      .filter(i=>!isNaN(i)&&AppState.processedOps[i]);
+  }
+ 
+  function _selectKbdOp(idx){
+    _kbdIdx=idx;
+    const op=AppState.processedOps[idx];
+    if(!op)return;
+    flashRawLine(idx);
+    flashStructOp(idx);
+    activateOp(op);
+    if(AppState.hlCanvas&&AppState.pageViewport)drawHighlight(op.highlight,AppState.hlCanvas,AppState.pageViewport);
+  }
+ 
+  document.addEventListener('keydown',e=>{
+    const tag=(document.activeElement&&document.activeElement.tagName)||'';
+    const inInput=tag==='INPUT'||tag==='TEXTAREA'||document.activeElement.isContentEditable;
+ 
+    if(e.key==='Escape'){
+      if(keysModal.classList.contains('open')){keysModal.classList.remove('open');return;}
+      if(document.getElementById('info-modal').classList.contains('open')){document.getElementById('info-modal').classList.remove('open');return;}
+      const mp=document.getElementById('multipage-results');
+      if(mp&&mp.classList.contains('open')){mp.classList.remove('open');document.getElementById('raw-search').value='';document.getElementById('raw-search-count').textContent='';return;}
+      document.querySelectorAll('.op-picker').forEach(p=>p.remove());
+      if(inInput){document.activeElement.blur();}
+      return;
+    }
+ 
+    if((e.ctrlKey||e.metaKey)&&e.key==='f'){
+      e.preventDefault();
+      document.getElementById('raw-search').focus();
+      return;
+    }
+ 
+    if(inInput)return;
+ 
+    if(e.key==='?'){
+      keysModal.classList.add('open');
+      return;
+    }
+ 
+    if(!AppState.processedOps.length)return;
+ 
+    if(e.key==='j'||e.key==='k'){
+      e.preventDefault();
+      const vis=_visibleOpIndices();
+      if(!vis.length)return;
+      const cur=vis.indexOf(_kbdIdx);
+      let next;
+      if(e.key==='j') next=cur<0||cur>=vis.length-1?vis[0]:vis[cur+1];
+      else next=cur<=0?vis[vis.length-1]:vis[cur-1];
+      _selectKbdOp(next);
+    }
+  });
+})();
+ 
+/* ── Resizable raw ↔ struct column splitter ── */
+(()=>{
+  const splitter=document.getElementById('col-splitter');
+  const leftPanel=document.getElementById('left-panel');
+  const SAVED_KEY='pdf-explorer-col-split';
+  const saved=parseInt(localStorage.getItem(SAVED_KEY));
+  if(saved>=160&&saved<=520)leftPanel.style.setProperty('--raw-col-w',saved+'px');
+  let drag=null;
+  splitter.addEventListener('mousedown',e=>{
+    drag={startX:e.clientX,startW:parseInt(getComputedStyle(leftPanel).getPropertyValue('--raw-col-w'))||300};
+    splitter.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!drag)return;
+    const newW=Math.max(160,Math.min(520,drag.startW+(e.clientX-drag.startX)));
+    leftPanel.style.setProperty('--raw-col-w',newW+'px');
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!drag)return;
+    const w=parseInt(getComputedStyle(leftPanel).getPropertyValue('--raw-col-w'))||300;
+    localStorage.setItem(SAVED_KEY,w);
+    splitter.classList.remove('dragging');
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
+    drag=null;
+  });
+})();
+ 
+/* ── Resizable left/right panel splitter ── */
+(()=>{
+  const splitter=document.getElementById('splitter');
+  const leftPanel=document.getElementById('left-panel');
+  const SAVED_KEY='pdf-explorer-split';
+  const saved=parseInt(localStorage.getItem(SAVED_KEY));
+  if(saved>=460&&saved<=900)leftPanel.style.width=saved+'px';
+  let drag=null;
+  splitter.addEventListener('mousedown',e=>{
+    drag={startX:e.clientX,startW:leftPanel.offsetWidth};
+    splitter.classList.add('dragging');
+    document.body.style.cursor='col-resize';
+    document.body.style.userSelect='none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!drag)return;
+    const newW=Math.max(460,Math.min(900,drag.startW+(e.clientX-drag.startX)));
+    leftPanel.style.width=newW+'px';
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!drag)return;
+    localStorage.setItem(SAVED_KEY,leftPanel.offsetWidth);
+    splitter.classList.remove('dragging');
+    document.body.style.cursor='';
+    document.body.style.userSelect='';
+    drag=null;
+  });
+})();
+ 
+/* ── Theme toggle ── */
+(function(){
+  const btn=document.getElementById('theme-btn');
+  function applyTheme(dark){
+    if(dark){document.documentElement.setAttribute('data-theme','dark');btn.textContent='☀';btn.title='Switch to light mode';}
+    else{document.documentElement.removeAttribute('data-theme');btn.textContent='🌙';btn.title='Switch to dark mode';}
+    localStorage.setItem('pdf-explorer-theme',dark?'dark':'light');
+  }
+  applyTheme(document.documentElement.getAttribute('data-theme')==='dark');
+  btn.addEventListener('click',()=>applyTheme(document.documentElement.getAttribute('data-theme')!=='dark'));
+})();
+</script>
+</body>
+</html>
+ 
