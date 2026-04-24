@@ -4,6 +4,7 @@
 
 ### 🚀 [Try the Live Demo](https://ingridstevens.github.io/pdf-explorer/)
 
+![ A screenshot of the PDF Layer Explorer Application](screenshot.png)
 ---
 
 ## ✨ Key Features
